@@ -69,6 +69,10 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
+  // Video Player State
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
   // Helper to check if two dates are the same day
   const isSameDay = (d1: Date, d2: Date) => {
     return (
@@ -158,6 +162,17 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
           audioRef.current.currentTime = newTime;
           setCurrentTime(newTime);
         }
+    }
+  };
+
+  // Video Player Helpers
+  const toggleVideo = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
     }
   };
 
@@ -272,14 +287,27 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
             </div>
             <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-white/10 shadow-2xl group">
                <video 
+                 ref={videoRef}
                  controls
                  preload="metadata"
                  className="w-full h-full object-cover"
                  poster={studio.image}
+                 onPlay={() => setIsVideoPlaying(true)}
+                 onPause={() => setIsVideoPlaying(false)}
                >
                  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4" />
                  Your browser does not support the video tag.
                </video>
+               
+               {/* Custom Play Button Overlay */}
+               <div 
+                 className={`absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/30 transition-all cursor-pointer z-10 ${isVideoPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                 onClick={toggleVideo}
+               >
+                  <button className="size-16 rounded-full bg-primary/90 text-background-dark flex items-center justify-center shadow-[0_0_30px_rgba(43,238,121,0.5)] hover:scale-110 transition-transform group-hover:shadow-[0_0_40px_rgba(43,238,121,0.6)]">
+                    <span className="material-symbols-outlined filled text-[40px] ml-1">play_arrow</span>
+                  </button>
+               </div>
             </div>
           </div>
 
