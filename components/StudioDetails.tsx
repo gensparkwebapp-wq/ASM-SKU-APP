@@ -16,6 +16,11 @@ interface Review {
   timestamp: number;
 }
 
+interface GalleryItem {
+  type: 'image' | 'video';
+  src: string;
+}
+
 const amenities = [
   { icon: "mic", label: "Neumann U87" },
   { icon: "piano", label: "Grand Piano" },
@@ -69,11 +74,11 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Gallery State
-  const [galleryImages, setGalleryImages] = useState<string[]>([
-    studio.image,
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuAnavj-pz28wdg5tVrtjt-dIcW6L1F7uKHBgW-_PI32MA9G65-JKfaXTMOn_4TrMc_ItV3Afw4IQ0I4SStlWqV3lJy04oiTafWKiYcm7Qls17SZhg5PKTyLbTXCEP7d-eqakI_yAk8JjogW7Wz-X89RPcB6-8orVZJ6WmSyrnRMAgHZG8tJBUaz9-NHd-zJ6QeXiY-_KlXF5iBCUex11PGGBlutXfxTo71-7umIX6dYqN2N9DP8QMhdkYBwL1bu0eIaH0nR8qwaepk",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuASjfGuSONgzGLWuTBL_Bp0Zny0DFqWdOQnCJISopOWRuts6CsQbnnZi-zSEEWGPThtJmE0aa2atkGe9ivDjohayFgvTcuDF5EpF8uf4ZT3WLxoRsWxAFRj84U5fuNZbINV0kGqyKB9-G4lLffAe0ie2uw8lvUfPVY2rWxOlz9pyOfcoEPhuS3Q0loehEHzJ_nmOj6R6Y5dN09IEzcwC-PtfR-Zq5xN_TOU_dud8GUrOZ1q57rf1DmRhW5akFg-3KC6HUmsvbY0iJc",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuCvCM5q41NbkWEz3XQOrGeE10kjvwok_HjjjTJWHbfEDFx4Ml-KRuFyTCbLTYQhlxuniJYSSJhzT2QC6nq3JxQxlrhnVZ6HdcyLYMOuBbAszpTfcPse75bpmLMdMDz2LMv_lAQAnHiqc_iES6lyYFETOTZkAdD9M-ftgEN17El3TDSkGWwoYbesXC9xNnjxYDzTUpXj2s8Oqb1QX2MFzEpGp8gqjQNXFq3fsTFcIfCEcmlFnOKyy46pzmtU40uwnQr7IVr5UYpbIDU"
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([
+    { type: 'image', src: studio.image },
+    { type: 'image', src: "https://lh3.googleusercontent.com/aida-public/AB6AXuAnavj-pz28wdg5tVrtjt-dIcW6L1F7uKHBgW-_PI32MA9G65-JKfaXTMOn_4TrMc_ItV3Afw4IQ0I4SStlWqV3lJy04oiTafWKiYcm7Qls17SZhg5PKTyLbTXCEP7d-eqakI_yAk8JjogW7Wz-X89RPcB6-8orVZJ6WmSyrnRMAgHZG8tJBUaz9-NHd-zJ6QeXiY-_KlXF5iBCUex11PGGBlutXfxTo71-7umIX6dYqN2N9DP8QMhdkYBwL1bu0eIaH0nR8qwaepk" },
+    { type: 'image', src: "https://lh3.googleusercontent.com/aida-public/AB6AXuASjfGuSONgzGLWuTBL_Bp0Zny0DFqWdOQnCJISopOWRuts6CsQbnnZi-zSEEWGPThtJmE0aa2atkGe9ivDjohayFgvTcuDF5EpF8uf4ZT3WLxoRsWxAFRj84U5fuNZbINV0kGqyKB9-G4lLffAe0ie2uw8lvUfPVY2rWxOlz9pyOfcoEPhuS3Q0loehEHzJ_nmOj6R6Y5dN09IEzcwC-PtfR-Zq5xN_TOU_dud8GUrOZ1q57rf1DmRhW5akFg-3KC6HUmsvbY0iJc" },
+    { type: 'image', src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCvCM5q41NbkWEz3XQOrGeE10kjvwok_HjjjTJWHbfEDFx4Ml-KRuFyTCbLTYQhlxuniJYSSJhzT2QC6nq3JxQxlrhnVZ6HdcyLYMOuBbAszpTfcPse75bpmLMdMDz2LMv_lAQAnHiqc_iES6lyYFETOTZkAdD9M-ftgEN17El3TDSkGWwoYbesXC9xNnjxYDzTUpXj2s8Oqb1QX2MFzEpGp8gqjQNXFq3fsTFcIfCEcmlFnOKyy46pzmtU40uwnQr7IVr5UYpbIDU" }
   ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -146,7 +151,10 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
         const reader = new FileReader();
         reader.onload = (e) => {
           if (e.target?.result) {
-            setGalleryImages(prev => [e.target!.result as string, ...prev]);
+            const result = e.target.result as string;
+            // Basic detection logic using file.type, fallback to image if unknown
+            const type = file.type.startsWith('video/') ? 'video' : 'image';
+            setGalleryItems(prev => [{ type, src: result }, ...prev]);
           }
         };
         reader.readAsDataURL(file);
@@ -422,12 +430,12 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
                 className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-bold transition-all text-white group"
               >
                 <span className="material-symbols-outlined text-[18px] group-hover:text-primary transition-colors">add_photo_alternate</span>
-                <span>Add Photos</span>
+                <span>Add Media</span>
               </button>
               <input 
                   type="file" 
                   multiple 
-                  accept="image/*" 
+                  accept="image/*,video/*" 
                   className="hidden" 
                   ref={fileInputRef} 
                   onChange={handleFileUpload} 
@@ -435,14 +443,35 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
             </div>
 
             <div className="columns-2 md:columns-3 gap-4 space-y-4">
-              {galleryImages.map((src, index) => (
+              {galleryItems.map((item, index) => (
                 <div key={index} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-black/20 border border-white/5">
-                   <img 
-                      src={src} 
+                  {item.type === 'video' ? (
+                     <div className="relative group/video">
+                        <video 
+                          src={item.src} 
+                          className="w-full h-auto object-cover" 
+                          controls={false}
+                          muted
+                          loop
+                          onMouseOver={e => (e.target as HTMLVideoElement).play()}
+                          onMouseOut={e => {
+                              const el = e.target as HTMLVideoElement;
+                              el.pause();
+                              el.currentTime = 0;
+                          }}
+                        />
+                         <div className="absolute top-2 right-2 size-6 rounded-full bg-black/60 backdrop-blur flex items-center justify-center pointer-events-none">
+                            <span className="material-symbols-outlined text-[14px] text-white">videocam</span>
+                         </div>
+                     </div>
+                  ) : (
+                    <img 
+                      src={item.src} 
                       alt={`Gallery ${index}`} 
                       className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500" 
-                   />
-                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none"></div>
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none"></div>
                 </div>
               ))}
             </div>
@@ -458,6 +487,56 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
                   <span className="text-sm font-medium text-white/80">{item.label}</span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Studio Policies Section */}
+          <div className="glass-card p-6 md:p-8 rounded-2xl">
+            <h3 className="text-xl font-bold text-white mb-6">Studio Policies</h3>
+            <div className="space-y-6">
+              {/* Cancellation */}
+              <div className="flex gap-4">
+                <div className="size-10 rounded-full bg-red-500/10 flex items-center justify-center shrink-0 border border-red-500/20">
+                  <span className="material-symbols-outlined text-red-400 text-[20px]">event_busy</span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-sm mb-1">Cancellation Policy</h4>
+                  <p className="text-white/60 text-sm leading-relaxed">
+                     Full refund if cancelled 48 hours prior. 50% refund within 24 hours. No refunds for no-shows or same-day cancellations.
+                  </p>
+                </div>
+              </div>
+
+              {/* Equipment */}
+              <div className="flex gap-4">
+                <div className="size-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20">
+                  <span className="material-symbols-outlined text-blue-400 text-[20px]">precision_manufacturing</span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-sm mb-1">Equipment Usage</h4>
+                  <p className="text-white/60 text-sm leading-relaxed">
+                     Handle all microphones and instruments with care. Hardware patching must be done by the house engineer. Damages caused by negligence will be invoiced.
+                  </p>
+                </div>
+              </div>
+
+              {/* House Rules */}
+              <div className="flex gap-4">
+                 <div className="size-10 rounded-full bg-yellow-500/10 flex items-center justify-center shrink-0 border border-yellow-500/20">
+                  <span className="material-symbols-outlined text-yellow-400 text-[20px]">gavel</span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-sm mb-2">House Rules</h4>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                     {["No smoking or vaping", "No food near console", "Max 6 people occupancy", "Clean up trash before leaving"].map((rule, i) => (
+                       <li key={i} className="flex items-center gap-2 text-xs text-white/60">
+                          <span className="size-1.5 rounded-full bg-white/20"></span>
+                          {rule}
+                       </li>
+                     ))}
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
 

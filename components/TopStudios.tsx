@@ -124,7 +124,7 @@ const TopStudios: React.FC<TopStudiosProps> = ({ onViewDetails }) => {
               key={studio.id}
               className="min-w-[280px] md:min-w-[320px] snap-center"
             >
-              <div className="glass-card rounded-xl overflow-hidden group h-full flex flex-col">
+              <div className="glass-card rounded-xl overflow-hidden group h-full flex flex-col hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(43,238,121,0.2)] transition-all duration-300">
                 {/* Image Section */}
                 <div className="relative h-40 w-full overflow-hidden">
                   <div
