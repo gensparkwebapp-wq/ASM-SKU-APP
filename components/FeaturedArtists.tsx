@@ -89,31 +89,29 @@ const FeaturedArtists: React.FC = () => {
             <div
               key={artist.id}
               className="flex flex-col items-center gap-3 min-w-[120px] snap-center group cursor-pointer"
-              onMouseEnter={() => setActiveArtistId(artist.id)}
-              onMouseLeave={() => setActiveArtistId(null)}
               onClick={() => handleInteraction(artist.id)}
             >
               <div className="relative size-24 md:size-32">
                 {/* Main Image Container */}
                 <div 
-                  className={`w-full h-full rounded-full p-1 border transition-all duration-300 overflow-hidden relative z-0 ${
+                  className={`w-full h-full rounded-full p-1 border transition-all duration-500 overflow-hidden relative z-0 ${
                     isActive ? "border-primary scale-105" : "border-white/10 group-hover:border-primary/50"
                   }`}
                 >
                   <div
-                    className={`w-full h-full rounded-full bg-cover bg-center transition-all duration-300 ${
-                       isActive ? "opacity-20 blur-sm" : "opacity-100"
+                    className={`w-full h-full rounded-full bg-cover bg-center transition-all duration-500 ${
+                       isActive ? "opacity-20 blur-md" : "opacity-100"
                     }`}
                     style={{ backgroundImage: `url("${artist.image}")` }}
                   ></div>
                   
                   {/* Bio Overlay */}
                   <div 
-                    className={`absolute inset-0 flex items-center justify-center p-2 text-center transition-all duration-300 ${
+                    className={`absolute inset-0 flex items-center justify-center p-2 text-center transition-all duration-500 ${
                       isActive ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"
                     }`}
                   >
-                    <p className="text-[9px] md:text-[10px] leading-tight text-white font-medium drop-shadow-md">
+                    <p className="text-[10px] md:text-[11px] leading-tight text-white font-bold drop-shadow-md">
                       {artist.bio}
                     </p>
                   </div>

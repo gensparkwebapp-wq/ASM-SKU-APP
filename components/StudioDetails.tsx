@@ -13,6 +13,7 @@ interface Review {
   text: string;
   date: string;
   avatar: string;
+  timestamp: number;
 }
 
 const amenities = [
@@ -31,7 +32,8 @@ const initialReviews: Review[] = [
     rating: 5,
     text: "Absolutely top-tier equipment. The sound engineer was super helpful with setting up the mic placement. Highly recommended for vocal tracking.",
     date: "2 days ago",
-    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuD_Y5JfKRXBOeZjY--cYTp30tSf5OUWOHWUy5Od0E1jnn65Y7XNlZne080-NmjZkCGRFSaNeAJMruju49u5MYyLFG9RDsiCF8OAQ1QdbOErvDKF14fNQpXtPzennUI85pgepruSTg1suZlk0-4uCZxN0jrwSs_T6GoGrnBvp8Zlspv5HdSnvY5IqukDMTDwVEhb6w-ftRcsK0lJCbFDEQfuC4GFvS3lusZpq-DftBN-ftD2qoVbyjI_FvFQCF3EBaHoDzyAlBcp-cs"
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuD_Y5JfKRXBOeZjY--cYTp30tSf5OUWOHWUy5Od0E1jnn65Y7XNlZne080-NmjZkCGRFSaNeAJMruju49u5MYyLFG9RDsiCF8OAQ1QdbOErvDKF14fNQpXtPzennUI85pgepruSTg1suZlk0-4uCZxN0jrwSs_T6GoGrnBvp8Zlspv5HdSnvY5IqukDMTDwVEhb6w-ftRcsK0lJCbFDEQfuC4GFvS3lusZpq-DftBN-ftD2qoVbyjI_FvFQCF3EBaHoDzyAlBcp-cs",
+    timestamp: Date.now() - 172800000 // ~2 days in ms
   },
   {
     id: 2,
@@ -39,7 +41,8 @@ const initialReviews: Review[] = [
     rating: 4,
     text: "Great vibe and lighting. The piano could use a slight tuning, but otherwise a fantastic experience. The lounge coffee is a life saver.",
     date: "1 week ago",
-    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDjsin6bbqdo26tyyXsik5L_Uiaxk6kcEAAZ1qTz1JCG_RDgfBDYVDtOiHphUXfr33o9ovAI-hqZ1IEVUyZNpEQIJmxYZpjKdrVAknJW5_avelwObnY9JfV_AM50cbY7HbHAOnHCxe1AMW5dusutWZqxhJrYOf0KfKbpaqyKu8UGFFzDlOxm6Yq61NDa8BPrh3CQrmUOeI7nNngdOeJYTnod9CTDsDmmMj7H4TH4mKXV5XhOnWUhSjpeYMkhgcp3stYmS-x7i1VDUE"
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDjsin6bbqdo26tyyXsik5L_Uiaxk6kcEAAZ1qTz1JCG_RDgfBDYVDtOiHphUXfr33o9ovAI-hqZ1IEVUyZNpEQIJmxYZpjKdrVAknJW5_avelwObnY9JfV_AM50cbY7HbHAOnHCxe1AMW5dusutWZqxhJrYOf0KfKbpaqyKu8UGFFzDlOxm6Yq61NDa8BPrh3CQrmUOeI7nNngdOeJYTnod9CTDsDmmMj7H4TH4mKXV5XhOnWUhSjpeYMkhgcp3stYmS-x7i1VDUE",
+    timestamp: Date.now() - 604800000 // ~1 week in ms
   },
   {
     id: 3,
@@ -47,7 +50,8 @@ const initialReviews: Review[] = [
     rating: 5,
     text: "Best studio in the area for the price. The acoustics in the main room are perfect for drums.",
     date: "3 weeks ago",
-    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBOxz8uouO_DmVYHaLiJJ2bsdlrpU9pK4AcAXfrUq1ratPnbCqFeEgBwoLPyp0BC9Nwp3u5p-I_lmkk3-6bvJxHXV0EmsWd_dxNQelf5K_oJ6ACxn7_3K3AX-eTLMulruNQeQU6GA4pmiQvlmqHa_Rf3nEFIK00H0VCio4OYMxuy8TkSSHpAihdfJlBVhjDr8fIbHPom8slMKSP5yd0BExcG9ZFx7uy-mL7K6GFrxi0-nvMp1BJnou6XJCl7ZU7F179-QT-TOVRHBs"
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBOxz8uouO_DmVYHaLiJJ2bsdlrpU9pK4AcAXfrUq1ratPnbCqFeEgBwoLPyp0BC9Nwp3u5p-I_lmkk3-6bvJxHXV0EmsWd_dxNQelf5K_oJ6ACxn7_3K3AX-eTLMulruNQeQU6GA4pmiQvlmqHa_Rf3nEFIK00H0VCio4OYMxuy8TkSSHpAihdfJlBVhjDr8fIbHPom8slMKSP5yd0BExcG9ZFx7uy-mL7K6GFrxi0-nvMp1BJnou6XJCl7ZU7F179-QT-TOVRHBs",
+    timestamp: Date.now() - 1814400000 // ~3 weeks in ms
   }
 ];
 
@@ -59,6 +63,7 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
   
   // Reviews State
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [userRating, setUserRating] = useState<number>(5);
   const [userComment, setUserComment] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -108,12 +113,13 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
     // Simulate network delay
     setTimeout(() => {
         const newReview: Review = {
-        id: Date.now(),
-        author: "You", // In a real app, this would come from auth context
-        rating: userRating,
-        text: userComment,
-        date: "Just now",
-        avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBrPdErdSK5U2vnFD0wG8cPDOWR-plB3eS2QS_tC870s2JjKVMHZWWGKRjF_PjSu2OkLpqX01x6fApt-Zs4y8S54UTpeAhXSSKeHf6OClynhJquMPSipZhDuGetTtE6tnE_A7DTBptRAe_ZHW6k1SYZZ8vEVa6oEWdQHGlL32FS8v1ILfLvZYhQI9x0NDI8YUc3jtGvjrJXtH4OYreoSzyaSmS0f5fj4FgFrtp8IWB53Qp3Gh4SyxnZ3pLWizFppcQZxN7ObQsf7MQ" // Placeholder avatar
+          id: Date.now(),
+          author: "You", // In a real app, this would come from auth context
+          rating: userRating,
+          text: userComment,
+          date: "Just now",
+          avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBrPdErdSK5U2vnFD0wG8cPDOWR-plB3eS2QS_tC870s2JjKVMHZWWGKRjF_PjSu2OkLpqX01x6fApt-Zs4y8S54UTpeAhXSSKeHf6OClynhJquMPSipZhDuGetTtE6tnE_A7DTBptRAe_ZHW6k1SYZZ8vEVa6oEWdQHGlL32FS8v1ILfLvZYhQI9x0NDI8YUc3jtGvjrJXtH4OYreoSzyaSmS0f5fj4FgFrtp8IWB53Qp3Gh4SyxnZ3pLWizFppcQZxN7ObQsf7MQ", // Placeholder avatar
+          timestamp: Date.now()
         };
 
         setReviews([newReview, ...reviews]);
@@ -200,6 +206,15 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
 
   const pricePerHourInt = parseInt(studio.pricePerHour.replace(/[^0-9]/g, ""));
   const totalPrice = pricePerHourInt * selectedDuration;
+
+  // Sorting Logic
+  const sortedReviews = [...reviews].sort((a, b) => {
+    if (sortOrder === 'newest') {
+      return b.timestamp - a.timestamp;
+    } else {
+      return a.timestamp - b.timestamp;
+    }
+  });
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 w-full min-h-screen pb-20">
@@ -399,9 +414,26 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
 
           {/* Reviews Section */}
           <div className="glass-card p-6 md:p-8 rounded-2xl">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-bold text-white">Reviews ({reviews.length})</h3>
-              <div className="flex items-center gap-2 bg-white/5 px-3 py-1 rounded-full border border-white/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <div className="flex items-center gap-4">
+                <h3 className="text-xl font-bold text-white">Reviews ({reviews.length})</h3>
+                <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/10">
+                    <button 
+                        onClick={() => setSortOrder('newest')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${sortOrder === 'newest' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
+                    >
+                        Newest
+                    </button>
+                    <button 
+                        onClick={() => setSortOrder('oldest')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${sortOrder === 'oldest' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
+                    >
+                        Oldest
+                    </button>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 bg-white/5 px-3 py-1 rounded-full border border-white/10 self-start sm:self-auto">
                 <span className="text-yellow-400 font-bold">{studio.rating}</span>
                 <div className="flex text-yellow-400">
                   {[...Array(5)].map((_, i) => (
@@ -458,8 +490,8 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
 
             {/* Review List */}
             <div className="flex flex-col gap-6">
-              {reviews.map((review) => (
-                <div key={review.id} className="border-b border-white/5 pb-6 last:border-0 last:pb-0">
+              {sortedReviews.map((review) => (
+                <div key={review.id} className="border-b border-white/5 pb-6 last:border-0 last:pb-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="flex items-start gap-4">
                     <div className="size-10 rounded-full bg-white/10 overflow-hidden flex-shrink-0">
                       <img src={review.avatar} alt={review.author} className="w-full h-full object-cover" />
