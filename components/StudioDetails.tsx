@@ -53,6 +53,7 @@ const initialReviews: Review[] = [
 
 const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDuration, setSelectedDuration] = useState<number>(2);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   
@@ -75,6 +76,23 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
       d1.getMonth() === d2.getMonth() &&
       d1.getFullYear() === d2.getFullYear()
     );
+  };
+
+  // Calendar Helpers
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const prevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+  };
+
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
 
   // Submit Review Handler
@@ -143,17 +161,23 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
     }
   };
 
-  // Generate next 14 days
-  const dates = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    return d;
-  });
-
-  // Time slots
-  const timeSlots = [
-    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", 
-    "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"
+  // Time slots grouped
+  const timeSections = [
+    { 
+        label: "Morning", 
+        icon: "wb_twilight",
+        slots: ["09:00", "10:00", "11:00"] 
+    },
+    { 
+        label: "Afternoon", 
+        icon: "light_mode",
+        slots: ["12:00", "13:00", "14:00", "15:00", "16:00"] 
+    },
+    { 
+        label: "Evening", 
+        icon: "dark_mode",
+        slots: ["17:00", "18:00", "19:00", "20:00", "21:00"] 
+    }
   ];
 
   // Mock unavailable slots for demo purposes
@@ -238,6 +262,25 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
               and 24/7 access for union members. Whether you are recording your next hit single or producing a full album, 
               {studio.name} delivers the quality you deserve.
             </p>
+          </div>
+
+          {/* Studio Video Tour - NEW */}
+          <div className="glass-card p-6 md:p-8 rounded-2xl">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="material-symbols-outlined text-primary">videocam</span>
+              <h3 className="text-xl font-bold text-white">Virtual Tour</h3>
+            </div>
+            <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-white/10 shadow-2xl group">
+               <video 
+                 controls
+                 preload="metadata"
+                 className="w-full h-full object-cover"
+                 poster={studio.image}
+               >
+                 <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4" />
+                 Your browser does not support the video tag.
+               </video>
+            </div>
           </div>
 
           {/* Audio Sample Section */}
@@ -419,30 +462,61 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
           <div className="glass-card p-6 rounded-2xl sticky top-24">
             <h3 className="text-xl font-bold text-white mb-6">Book a Session</h3>
             
-            {/* Date Picker */}
-            <div className="mb-6">
-              <label className="block text-xs font-bold text-white/50 uppercase tracking-wider mb-3">Select Date</label>
-              <div className="flex gap-2 overflow-x-auto pb-4 hide-scrollbar -mx-2 px-2">
-                {dates.map((date, i) => {
-                  const selected = isSameDay(date, selectedDate);
-                  return (
-                    <button 
-                      key={i} 
-                      onClick={() => { setSelectedDate(date); setSelectedTime(null); }}
-                      className={`flex flex-col items-center justify-center min-w-[64px] h-[72px] rounded-xl border transition-all duration-200 shrink-0 ${
-                        selected 
-                          ? 'bg-primary text-background-dark border-primary shadow-[0_0_15px_rgba(43,238,121,0.3)] transform scale-105' 
-                          : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
-                      }`}
-                    >
-                      <span className={`text-xs font-bold mb-1 ${selected ? 'opacity-100' : 'opacity-60'}`}>
-                        {date.toLocaleDateString('en-US', { weekday: 'short' })}
-                      </span>
-                      <span className="text-xl font-bold">{date.getDate()}</span>
+            {/* Calendar Date Picker */}
+            <div className="mb-6 bg-white/5 rounded-xl p-4 border border-white/5">
+                <div className="flex items-center justify-between mb-4">
+                    <button onClick={prevMonth} className="size-8 flex items-center justify-center rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors">
+                        <span className="material-symbols-outlined text-sm">chevron_left</span>
                     </button>
-                  )
-                })}
-              </div>
+                    <span className="text-sm font-bold text-white">
+                        {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </span>
+                    <button onClick={nextMonth} className="size-8 flex items-center justify-center rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors">
+                        <span className="material-symbols-outlined text-sm">chevron_right</span>
+                    </button>
+                </div>
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                    {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                        <div key={day} className="text-center text-[10px] text-white/30 font-bold uppercase">{day}</div>
+                    ))}
+                </div>
+                <div className="grid grid-cols-7 gap-1">
+                    {/* Empty cells for days before start of month */}
+                    {Array.from({ length: getFirstDayOfMonth(currentMonth) }).map((_, i) => (
+                        <div key={`empty-${i}`} />
+                    ))}
+                    {/* Days of the month */}
+                    {Array.from({ length: getDaysInMonth(currentMonth) }).map((_, i) => {
+                        const day = i + 1;
+                        const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+                        const isSelected = isSameDay(date, selectedDate);
+                        const today = new Date();
+                        today.setHours(0,0,0,0);
+                        const isPast = date < today;
+
+                        return (
+                            <button
+                                key={day}
+                                disabled={isPast}
+                                onClick={() => { setSelectedDate(date); setSelectedTime(null); }}
+                                className={`aspect-square rounded-lg flex items-center justify-center text-xs font-medium transition-all duration-200 ${
+                                    isSelected 
+                                        ? 'bg-primary text-background-dark font-bold shadow-lg scale-105' 
+                                        : isPast
+                                            ? 'text-white/10 cursor-not-allowed'
+                                            : 'text-white hover:bg-white/10'
+                                }`}
+                            >
+                                {day}
+                            </button>
+                        );
+                    })}
+                </div>
+                <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-center">
+                    <div className="text-xs text-white/50">
+                        Selected: <span className="text-white font-bold">{selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
+                    </div>
+                </div>
             </div>
 
             {/* Duration Selection */}
@@ -465,31 +539,41 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
               </div>
             </div>
 
-            {/* Time Selection */}
+            {/* Robust Time Selection */}
             <div className="mb-6">
               <label className="block text-xs font-bold text-white/50 uppercase tracking-wider mb-3">Available Slots</label>
-              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 gap-2">
-                {timeSlots.map((time) => {
-                  const isTaken = unavailableSlots.includes(time);
-                  const isSelected = selectedTime === time;
-                  
-                  return (
-                    <button
-                      key={time}
-                      disabled={isTaken}
-                      onClick={() => setSelectedTime(time)}
-                      className={`py-2 rounded-lg border text-sm font-medium transition-all ${
-                        isSelected
-                          ? 'bg-primary text-background-dark border-primary shadow-lg'
-                          : isTaken
-                          ? 'bg-white/5 border-transparent text-white/20 cursor-not-allowed decoration-slice line-through'
-                          : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/30'
-                      }`}
-                    >
-                      {time}
-                    </button>
-                  );
-                })}
+              <div className="space-y-4">
+                  {timeSections.map((section) => (
+                      <div key={section.label}>
+                        <div className="flex items-center gap-2 mb-2 px-1">
+                             <span className="material-symbols-outlined text-[14px] text-white/30">{section.icon}</span>
+                             <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">{section.label}</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                            {section.slots.map((time) => {
+                              const isTaken = unavailableSlots.includes(time);
+                              const isSelected = selectedTime === time;
+                              
+                              return (
+                                <button
+                                  key={time}
+                                  disabled={isTaken}
+                                  onClick={() => setSelectedTime(time)}
+                                  className={`py-2 rounded-lg border text-sm font-medium transition-all ${
+                                    isSelected
+                                      ? 'bg-primary text-background-dark border-primary shadow-lg'
+                                      : isTaken
+                                      ? 'bg-white/5 border-transparent text-white/10 cursor-not-allowed decoration-slice line-through'
+                                      : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/30'
+                                  }`}
+                                >
+                                  {time}
+                                </button>
+                              );
+                            })}
+                        </div>
+                      </div>
+                  ))}
               </div>
             </div>
 
