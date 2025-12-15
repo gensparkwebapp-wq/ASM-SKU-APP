@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 // Types
 type MediaType = 'image' | 'video' | 'reel' | 'audio';
@@ -12,8 +12,24 @@ interface PortfolioItem {
   description: string;
 }
 
-// Mock Data
-const artist = {
+interface Track {
+  id: number;
+  title: string;
+  plays: string;
+  duration: string;
+  image: string;
+}
+
+interface Event {
+  id: number;
+  title: string;
+  date: string;
+  venue: string;
+  location: string;
+}
+
+// Initial Data
+const initialArtist = {
   name: "Arjun Mehta",
   username: "@arjun_music",
   category: "Musician",
@@ -39,13 +55,13 @@ const artist = {
   instruments: ["Vocals", "Guitar", "Ableton"]
 };
 
-const tracks = [
+const initialTracks: Track[] = [
   { id: 1, title: "Midnight Raga", plays: "45.2k", duration: "3:45", image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop" },
   { id: 2, title: "Neon Streets", plays: "28.1k", duration: "4:12", image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=100&fit=crop" },
   { id: 3, title: "Monsoon Feelings", plays: "12.5k", duration: "3:20", image: "https://images.unsplash.com/photo-1501612780327-45045538702b?w=100&h=100&fit=crop" }
 ];
 
-const portfolioItems: PortfolioItem[] = [
+const initialPortfolioItems: PortfolioItem[] = [
     { 
       id: 1, 
       type: 'video', 
@@ -78,72 +94,164 @@ const portfolioItems: PortfolioItem[] = [
       title: 'Demo - "Drift"',
       description: 'A rough sketch of a new track I am working on. Let me know what you think of the bassline!'
     },
-    { 
-      id: 5, 
-      type: 'image', 
-      thumb: 'https://images.unsplash.com/photo-1501612780327-45045538702b?w=600&h=600&fit=crop', 
-      src: 'https://images.unsplash.com/photo-1501612780327-45045538702b?w=1200&h=800&fit=crop',
-      title: 'Press Shot',
-      description: 'Official press photo for the 2025 Summer Tour.'
-    },
-    { 
-      id: 6, 
-      type: 'image', 
-      thumb: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=600&h=600&fit=crop', 
-      src: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=1200&h=800&fit=crop',
-      title: 'Backstage',
-      description: 'Moments of calm before the storm.'
-    },
-    { 
-      id: 7, 
-      type: 'reel', 
-      thumb: 'https://images.unsplash.com/photo-1598387993441-a364f854c3e1?w=600&h=600&fit=crop', 
-      src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-      title: 'Crowd Reaction',
-      description: 'The energy last night was unmatched! Thank you Mumbai!'
-    },
-    {
-      id: 8,
-      type: 'video',
-      thumb: 'https://images.unsplash.com/photo-1459749411177-287ce112a8bf?w=600&h=600&fit=crop',
-      src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      title: 'Acoustic Set',
-      description: 'Stripped back version of "Neon Streets".'
-    }
 ];
 
 const ArtistProfile: React.FC = () => {
+  // Main State
+  const [artist, setArtist] = useState(initialArtist);
+  const [tracks, setTracks] = useState(initialTracks);
+  const [portfolioItems, setPortfolioItems] = useState(initialPortfolioItems);
+  const [events, setEvents] = useState<Event[]>([]); // Start empty to show empty state logic
+  
+  // UI State
   const [activeTab, setActiveTab] = useState<'portfolio' | 'tracks' | 'events'>('portfolio');
   const [portfolioFilter, setPortfolioFilter] = useState<'all' | 'image' | 'video' | 'reel' | 'audio'>('all');
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
 
-  const filteredPortfolio = portfolioItems.filter(item => 
-      portfolioFilter === 'all' ? true : item.type === portfolioFilter
-  );
+  // Modal State
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isAddMediaOpen, setIsAddMediaOpen] = useState(false);
+  const [isAddTrackOpen, setIsAddTrackOpen] = useState(false);
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
 
+  // Refs for file inputs
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const trackImageInputRef = useRef<HTMLInputElement>(null);
+
+  // --- Handlers ---
+
+  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setArtist(prev => ({ ...prev, banner: ev.target?.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setArtist(prev => ({ ...prev, avatar: ev.target?.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveProfile = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    setArtist(prev => ({
+        ...prev,
+        name: formData.get('name') as string,
+        category: formData.get('category') as string,
+        subCategory: formData.get('subCategory') as string,
+        location: formData.get('location') as string,
+        whatsapp: formData.get('whatsapp') as string,
+        bio: formData.get('bio') as string,
+    }));
+    setIsEditProfileOpen(false);
+  };
+
+  const handleAddMedia = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const type = formData.get('type') as MediaType;
+    // Mock image for demo if no file uploaded
+    const mockImage = "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&h=600&fit=crop";
+    
+    const newItem: PortfolioItem = {
+        id: Date.now(),
+        type,
+        title: formData.get('title') as string,
+        description: formData.get('description') as string,
+        thumb: mockImage, // In real app, generate from file
+        src: mockImage,   // In real app, upload file
+    };
+    setPortfolioItems([newItem, ...portfolioItems]);
+    setIsAddMediaOpen(false);
+  };
+
+  const handleAddTrack = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newTrack: Track = {
+        id: Date.now(),
+        title: formData.get('title') as string,
+        duration: "0:00", // Would come from audio file metadata
+        plays: "0",
+        image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop"
+    };
+    setTracks([newTrack, ...tracks]);
+    setIsAddTrackOpen(false);
+  };
+
+  const handleAddEvent = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newEvent: Event = {
+        id: Date.now(),
+        title: formData.get('title') as string,
+        venue: formData.get('venue') as string,
+        location: formData.get('location') as string,
+        date: formData.get('date') as string,
+    };
+    setEvents([newEvent, ...events]);
+    setIsAddEventOpen(false);
+  };
+
+  const handleBookNow = (e: React.FormEvent) => {
+      e.preventDefault();
+      // Simulate API call
+      setTimeout(() => {
+          setIsBookingOpen(false);
+          alert(`Booking request sent to ${artist.name}!`);
+      }, 1000);
+  };
+
+  // Helper
   const getIconForType = (type: MediaType) => {
     switch (type) {
       case 'video': return 'play_arrow';
-      case 'reel': return 'movie'; // or 'smart_display' for reels feel
+      case 'reel': return 'movie'; 
       case 'audio': return 'music_note';
       default: return null;
     }
   };
 
+  const filteredPortfolio = portfolioItems.filter(item => 
+      portfolioFilter === 'all' ? true : item.type === portfolioFilter
+  );
+  
   const relatedMedia = portfolioItems.filter(item => item.id !== selectedItem?.id).slice(0, 3);
 
   return (
     <div className="w-full min-h-screen pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* --- HIDDEN FILE INPUTS --- */}
+      <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+      <input type="file" ref={avatarInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+
       {/* 1. Cover Photo (Banner) */}
       <div className="relative h-[350px] w-full group">
         <div 
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center transition-all duration-700"
             style={{ backgroundImage: `url("${artist.banner}")` }}
         ></div>
         <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/20 to-transparent"></div>
         
-        {/* Edit Cover Button */}
-        <button className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 border border-white/10 transition-all opacity-0 group-hover:opacity-100">
+        {/* Edit Cover Button - Functioning */}
+        <button 
+            onClick={() => bannerInputRef.current?.click()}
+            className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 border border-white/10 transition-all opacity-0 group-hover:opacity-100 z-10"
+        >
             <span className="material-symbols-outlined text-[16px]">edit</span>
             Edit Cover
         </button>
@@ -157,20 +265,28 @@ const ArtistProfile: React.FC = () => {
                <div className="glass-card p-6 rounded-2xl relative">
                   
                   {/* 2. Profile Photo */}
-                  <div className="relative -mt-20 mb-4 flex justify-between items-end">
-                     <div className="size-36 rounded-2xl p-1 bg-background-dark shadow-2xl">
+                  <div className="relative -mt-20 mb-4 flex justify-between items-end group">
+                     <div className="relative size-36 rounded-2xl p-1 bg-background-dark shadow-2xl">
                         <img 
                             src={artist.avatar} 
                             alt={artist.name} 
                             className="w-full h-full rounded-xl object-cover border border-white/10" 
                         />
+                        {/* Edit Avatar Overlay */}
+                        <div 
+                            onClick={() => avatarInputRef.current?.click()}
+                            className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                        >
+                            <span className="material-symbols-outlined text-white">photo_camera</span>
+                        </div>
                      </div>
                      <div className="flex gap-2 mb-2">
-                        <button className="size-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors" title="Share">
-                            <span className="material-symbols-outlined text-[20px]">share</span>
-                        </button>
-                        <button className="size-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors" title="Settings">
-                            <span className="material-symbols-outlined text-[20px]">settings</span>
+                        <button 
+                            onClick={() => setIsEditProfileOpen(true)}
+                            className="size-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors text-primary" 
+                            title="Edit Profile"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">edit</span>
                         </button>
                      </div>
                   </div>
@@ -218,7 +334,7 @@ const ArtistProfile: React.FC = () => {
                       </div>
                       <div className="w-px h-8 bg-white/10"></div>
                       <div className="text-center">
-                          <div className="font-bold text-white text-lg">{artist.stats.tracks}</div>
+                          <div className="font-bold text-white text-lg">{tracks.length}</div>
                           <div className="text-[10px] text-white/40 uppercase tracking-wider font-bold">Tracks</div>
                       </div>
                   </div>
@@ -234,7 +350,10 @@ const ArtistProfile: React.FC = () => {
                           <span className="material-symbols-outlined filled">chat</span>
                           Contact via WhatsApp
                       </a>
-                      <button className="w-full py-3 bg-white/5 text-white font-bold rounded-xl border border-white/10 hover:bg-white/10 transition-all">
+                      <button 
+                        onClick={() => setIsBookingOpen(true)}
+                        className="w-full py-3 bg-white/5 text-white font-bold rounded-xl border border-white/10 hover:bg-white/10 transition-all"
+                      >
                           Book Now
                       </button>
                   </div>
@@ -317,7 +436,10 @@ const ArtistProfile: React.FC = () => {
                                    </div>
                                </div>
 
-                               <button className="flex items-center gap-1 text-xs font-bold text-primary hover:underline self-start sm:self-auto whitespace-nowrap">
+                               <button 
+                                onClick={() => setIsAddMediaOpen(true)}
+                                className="flex items-center gap-1 text-xs font-bold text-primary hover:underline self-start sm:self-auto whitespace-nowrap"
+                               >
                                    <span className="material-symbols-outlined text-[16px]">add_circle</span>
                                    Add Media
                                </button>
@@ -386,8 +508,11 @@ const ArtistProfile: React.FC = () => {
                                ))}
                            </div>
                            
-                           {/* Upload CTA */}
-                           <div className="mt-6 p-8 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center text-center hover:border-primary/30 hover:bg-white/[0.02] transition-all cursor-pointer group">
+                           {/* Upload CTA - Functioning */}
+                           <div 
+                            onClick={() => setIsAddTrackOpen(true)}
+                            className="mt-6 p-8 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center text-center hover:border-primary/30 hover:bg-white/[0.02] transition-all cursor-pointer group"
+                           >
                                 <div className="size-12 rounded-full bg-white/5 flex items-center justify-center text-white/30 group-hover:text-primary group-hover:bg-primary/10 transition-colors mb-3">
                                     <span className="material-symbols-outlined">cloud_upload</span>
                                 </div>
@@ -398,18 +523,58 @@ const ArtistProfile: React.FC = () => {
                    )}
                    
                    {activeTab === 'events' && (
-                       <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 flex flex-col items-center justify-center h-[300px] text-center bg-white/[0.02] rounded-2xl border border-white/5">
-                           <div className="size-16 rounded-full bg-white/5 flex items-center justify-center text-white/20 mb-4">
-                               <span className="material-symbols-outlined text-3xl">event_busy</span>
-                           </div>
-                           <h3 className="text-lg font-bold text-white mb-2">No Upcoming Events</h3>
-                           <p className="text-white/50 text-sm max-w-xs mb-6">
-                               You haven't added any upcoming gigs or performances yet.
-                           </p>
-                           <button className="px-5 py-2 bg-white/10 border border-white/10 rounded-full text-sm font-bold hover:bg-white/20 transition-all flex items-center gap-2">
-                               <span className="material-symbols-outlined text-[16px]">add</span>
-                               Add Event
-                           </button>
+                       <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                           {events.length > 0 ? (
+                               <div className="space-y-4">
+                                  <div className="flex items-center justify-between mb-4">
+                                     <h3 className="text-xl font-bold text-white">Upcoming Events</h3>
+                                     <button onClick={() => setIsAddEventOpen(true)} className="flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                                         <span className="material-symbols-outlined text-[16px]">add</span> Add Event
+                                     </button>
+                                  </div>
+                                  {events.map((evt) => (
+                                      <div key={evt.id} className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                                          <div className="flex-shrink-0 w-full sm:w-20 h-20 bg-white/5 rounded-lg flex flex-col items-center justify-center border border-white/10">
+                                              <span className="text-primary font-bold text-xl">{new Date(evt.date).getDate()}</span>
+                                              <span className="text-white/50 text-xs uppercase font-bold">{new Date(evt.date).toLocaleString('default', { month: 'short' })}</span>
+                                          </div>
+                                          <div className="flex-1">
+                                              <h4 className="font-bold text-white text-lg">{evt.title}</h4>
+                                              <div className="flex items-center gap-2 text-white/60 text-sm mt-1">
+                                                  <span className="material-symbols-outlined text-[16px]">apartment</span>
+                                                  {evt.venue}
+                                              </div>
+                                              <div className="flex items-center gap-2 text-white/60 text-sm mt-1">
+                                                  <span className="material-symbols-outlined text-[16px]">location_on</span>
+                                                  {evt.location}
+                                              </div>
+                                          </div>
+                                          <div className="flex items-center sm:self-center">
+                                              <button className="px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-lg text-sm font-bold hover:bg-primary/20 transition-colors">
+                                                  Tickets
+                                              </button>
+                                          </div>
+                                      </div>
+                                  ))}
+                               </div>
+                           ) : (
+                               <div className="flex flex-col items-center justify-center h-[300px] text-center bg-white/[0.02] rounded-2xl border border-white/5">
+                                   <div className="size-16 rounded-full bg-white/5 flex items-center justify-center text-white/20 mb-4">
+                                       <span className="material-symbols-outlined text-3xl">event_busy</span>
+                                   </div>
+                                   <h3 className="text-lg font-bold text-white mb-2">No Upcoming Events</h3>
+                                   <p className="text-white/50 text-sm max-w-xs mb-6">
+                                       You haven't added any upcoming gigs or performances yet.
+                                   </p>
+                                   <button 
+                                    onClick={() => setIsAddEventOpen(true)}
+                                    className="px-5 py-2 bg-white/10 border border-white/10 rounded-full text-sm font-bold hover:bg-white/20 transition-all flex items-center gap-2"
+                                   >
+                                       <span className="material-symbols-outlined text-[16px]">add</span>
+                                       Add Event
+                                   </button>
+                               </div>
+                           )}
                        </div>
                    )}
                 </div>
@@ -417,7 +582,191 @@ const ArtistProfile: React.FC = () => {
          </div>
       </div>
 
-      {/* Full Viewer Modal */}
+      {/* --- MODALS --- */}
+
+      {/* Edit Profile Modal */}
+      {isEditProfileOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-[#121418] border border-white/10 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                <div className="p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#121418] z-10">
+                    <h3 className="text-xl font-bold text-white">Edit Profile</h3>
+                    <button onClick={() => setIsEditProfileOpen(false)}><span className="material-symbols-outlined text-white/50 hover:text-white">close</span></button>
+                </div>
+                <form onSubmit={handleSaveProfile} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Name</label>
+                        <input name="name" defaultValue={artist.name} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Category</label>
+                        <input name="category" defaultValue={artist.category} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Sub-Category</label>
+                        <input name="subCategory" defaultValue={artist.subCategory} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Location</label>
+                        <input name="location" defaultValue={artist.location} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">WhatsApp Number</label>
+                        <input name="whatsapp" defaultValue={artist.whatsapp} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Bio</label>
+                        <textarea name="bio" defaultValue={artist.bio} rows={4} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary resize-none" />
+                    </div>
+                    <button type="submit" className="w-full bg-primary text-background-dark font-bold py-3 rounded-xl hover:brightness-110 mt-2">Save Changes</button>
+                </form>
+            </div>
+        </div>
+      )}
+
+      {/* Add Media Modal */}
+      {isAddMediaOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-[#121418] border border-white/10 rounded-2xl w-full max-w-md">
+                <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-white">Add to Portfolio</h3>
+                    <button onClick={() => setIsAddMediaOpen(false)}><span className="material-symbols-outlined text-white/50 hover:text-white">close</span></button>
+                </div>
+                <form onSubmit={handleAddMedia} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Media Type</label>
+                        <select name="type" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary">
+                            <option value="image">Image</option>
+                            <option value="video">Video</option>
+                            <option value="reel">Reel</option>
+                            <option value="audio">Audio</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Title</label>
+                        <input name="title" required placeholder="e.g. Live Performance 2024" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Upload File</label>
+                        <div className="border-2 border-dashed border-white/10 rounded-lg p-8 text-center cursor-pointer hover:bg-white/5 transition-colors">
+                            <span className="material-symbols-outlined text-white/30 text-3xl">cloud_upload</span>
+                            <p className="text-xs text-white/50 mt-2">Click to select file</p>
+                            <input type="file" required className="hidden" />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Description</label>
+                        <textarea name="description" placeholder="Describe this work..." rows={3} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary resize-none" />
+                    </div>
+                    <button type="submit" className="w-full bg-primary text-background-dark font-bold py-3 rounded-xl hover:brightness-110 mt-2">Add Item</button>
+                </form>
+            </div>
+        </div>
+      )}
+
+      {/* Add Track Modal */}
+      {isAddTrackOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-[#121418] border border-white/10 rounded-2xl w-full max-w-md">
+                <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-white">Upload New Track</h3>
+                    <button onClick={() => setIsAddTrackOpen(false)}><span className="material-symbols-outlined text-white/50 hover:text-white">close</span></button>
+                </div>
+                <form onSubmit={handleAddTrack} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Track Title</label>
+                        <input name="title" required placeholder="e.g. Summer Vibes" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                     <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Audio File</label>
+                        <div className="border-2 border-dashed border-white/10 rounded-lg p-6 text-center cursor-pointer hover:bg-white/5 transition-colors">
+                            <span className="material-symbols-outlined text-white/30 text-2xl">audio_file</span>
+                            <p className="text-xs text-white/50 mt-2">Select Audio File (MP3/WAV)</p>
+                            <input type="file" accept="audio/*" className="hidden" />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Cover Art</label>
+                        <div className="border-2 border-dashed border-white/10 rounded-lg p-6 text-center cursor-pointer hover:bg-white/5 transition-colors">
+                            <span className="material-symbols-outlined text-white/30 text-2xl">image</span>
+                            <p className="text-xs text-white/50 mt-2">Select Cover Image</p>
+                            <input type="file" accept="image/*" className="hidden" />
+                        </div>
+                    </div>
+                    <button type="submit" className="w-full bg-primary text-background-dark font-bold py-3 rounded-xl hover:brightness-110 mt-2">Upload Track</button>
+                </form>
+            </div>
+        </div>
+      )}
+
+      {/* Add Event Modal */}
+      {isAddEventOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-[#121418] border border-white/10 rounded-2xl w-full max-w-md">
+                <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-white">Add Event</h3>
+                    <button onClick={() => setIsAddEventOpen(false)}><span className="material-symbols-outlined text-white/50 hover:text-white">close</span></button>
+                </div>
+                <form onSubmit={handleAddEvent} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Event Name</label>
+                        <input name="title" required placeholder="e.g. Live at Hard Rock" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Date</label>
+                        <input type="date" name="date" required className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Venue</label>
+                        <input name="venue" required placeholder="e.g. Hard Rock Cafe" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Location</label>
+                        <input name="location" required placeholder="e.g. Mumbai" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <button type="submit" className="w-full bg-primary text-background-dark font-bold py-3 rounded-xl hover:brightness-110 mt-2">Add Event</button>
+                </form>
+            </div>
+        </div>
+      )}
+
+      {/* Booking Modal */}
+      {isBookingOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-[#121418] border border-white/10 rounded-2xl w-full max-w-md">
+                <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-white">Book {artist.name}</h3>
+                    <button onClick={() => setIsBookingOpen(false)}><span className="material-symbols-outlined text-white/50 hover:text-white">close</span></button>
+                </div>
+                <form onSubmit={handleBookNow} className="p-6 space-y-4">
+                    <p className="text-white/60 text-sm mb-2">Fill out this form to request a booking. The artist will contact you via your registered email or phone.</p>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Event Type</label>
+                        <select className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary">
+                            <option>Live Performance</option>
+                            <option>Studio Session</option>
+                            <option>Private Event</option>
+                            <option>Workshop</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Preferred Date</label>
+                        <input type="date" required className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Budget (Approx)</label>
+                        <input placeholder="e.g. ₹50,000" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Message</label>
+                        <textarea rows={3} placeholder="Tell us more about the event..." className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary resize-none" />
+                    </div>
+                    <button type="submit" className="w-full bg-primary text-background-dark font-bold py-3 rounded-xl hover:brightness-110 mt-2">Send Request</button>
+                </form>
+            </div>
+        </div>
+      )}
+
+      {/* Full Viewer Modal (Existing) */}
       {selectedItem && (
           <div 
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 animate-in fade-in duration-300"
