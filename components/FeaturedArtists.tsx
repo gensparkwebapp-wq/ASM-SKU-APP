@@ -111,7 +111,7 @@ const FeaturedArtists: React.FC = () => {
                       isActive ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"
                     }`}
                   >
-                    <p className="text-[10px] md:text-[11px] leading-tight text-white font-bold drop-shadow-md">
+                    <p className="text-[10px] md:text-[11px] leading-tight text-white font-bold drop-shadow-md select-none">
                       {artist.bio}
                     </p>
                   </div>
@@ -121,10 +121,12 @@ const FeaturedArtists: React.FC = () => {
                 <a
                   href={artist.soundcloudUrl}
                   className={`absolute bottom-0 right-0 bg-[#ff5500] text-white p-1.5 md:p-2 rounded-full border-[3px] border-background-dark shadow-lg flex items-center justify-center transition-transform duration-300 z-10 ${
-                    isActive ? "scale-0 opacity-0" : "scale-100 opacity-100 hover:scale-110"
+                    isActive ? "scale-0 opacity-0 pointer-events-none" : "scale-100 opacity-100 hover:scale-110"
                   }`}
                   title="Listen on SoundCloud"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
                 >
                   <span className="material-symbols-outlined text-[14px] md:text-[16px]">
                     cloud
