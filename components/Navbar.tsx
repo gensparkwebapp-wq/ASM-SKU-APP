@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 
 interface NavbarProps {
-  onNavigate: (view: 'home' | 'about' | 'my-studios') => void;
+  onNavigate: (view: 'home' | 'about' | 'my-studios' | 'profile') => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
@@ -112,7 +112,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
                         </div>
                     </div>
                     <div className="p-1.5">
-                        <button className="w-full text-left px-3 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-3 transition-colors group">
+                        <button 
+                            onClick={() => {
+                                onNavigate('profile');
+                                setIsDropdownOpen(false);
+                            }}
+                            className="w-full text-left px-3 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-3 transition-colors group"
+                        >
                             <span className="material-symbols-outlined text-[20px] text-white/40 group-hover:text-primary transition-colors">person</span>
                             My Profile
                         </button>

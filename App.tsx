@@ -12,8 +12,9 @@ import GallerySection from "./components/GallerySection";
 import ExploreGrid from "./components/ExploreGrid";
 import Footer from "./components/Footer";
 import MyStudios from "./components/MyStudios";
+import ArtistProfile from "./components/ArtistProfile";
 
-type ViewState = 'home' | 'about' | 'studio-details' | 'my-studios';
+type ViewState = 'home' | 'about' | 'studio-details' | 'my-studios' | 'profile';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('home');
@@ -25,7 +26,7 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleNavigate = (view: 'home' | 'about' | 'my-studios') => {
+  const handleNavigate = (view: 'home' | 'about' | 'my-studios' | 'profile') => {
     setCurrentView(view);
     setSelectedStudio(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -54,6 +55,8 @@ const App: React.FC = () => {
           <AboutPage />
         ) : currentView === 'my-studios' ? (
           <MyStudios />
+        ) : currentView === 'profile' ? (
+          <ArtistProfile />
         ) : (
           <>
             <Hero />
