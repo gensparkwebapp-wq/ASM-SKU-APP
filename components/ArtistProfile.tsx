@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 // Types
 type MediaType = 'image' | 'video' | 'reel' | 'audio';
@@ -96,6 +96,167 @@ const initialPortfolioItems: PortfolioItem[] = [
     },
 ];
 
+// --- Sub-Components ---
+
+const ImageViewer = ({ src, alt }: { src: string; alt: string }) => {
+    const [scale, setScale] = useState(1);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+    const imgRef = useRef<HTMLImageElement>(null);
+
+    const handleZoomIn = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setScale(prev => Math.min(prev + 0.5, 4));
+    };
+
+    const handleZoomOut = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setScale(prev => {
+            const newScale = Math.max(prev - 0.5, 1);
+            if (newScale === 1) setPosition({ x: 0, y: 0 }); // Reset pos on full zoom out
+            return newScale;
+        });
+    };
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (scale > 1) {
+            setIsDragging(true);
+            setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
+        }
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (isDragging && scale > 1) {
+            e.preventDefault();
+            setPosition({
+                x: e.clientX - startPos.x,
+                y: e.clientY - startPos.y
+            });
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    return (
+        <div 
+            className="relative w-full h-full overflow-hidden flex items-center justify-center bg-black/50 rounded-2xl border border-white/5 group pointer-events-auto"
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+        >
+            <img 
+                ref={imgRef}
+                src={src} 
+                alt={alt} 
+                className={`max-w-full max-h-[90vh] transition-transform duration-100 ease-linear select-none ${scale > 1 ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                style={{ 
+                    transform: `translate(${position.x}px, ${position.y}px) scale(${scale})` 
+                }}
+                onMouseDown={handleMouseDown}
+                draggable={false}
+            />
+
+            {/* Controls */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 backdrop-blur-md p-2 rounded-full border border-white/10 z-10 pointer-events-auto">
+                <button onClick={handleZoomOut} className="size-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center">
+                    <span className="material-symbols-outlined text-sm">remove</span>
+                </button>
+                <span className="px-2 flex items-center text-xs font-mono text-white min-w-[3rem] justify-center">{Math.round(scale * 100)}%</span>
+                <button onClick={handleZoomIn} className="size-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center">
+                    <span className="material-symbols-outlined text-sm">add</span>
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); setScale(1); setPosition({x:0, y:0}); }} className="size-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center ml-2" title="Reset">
+                    <span className="material-symbols-outlined text-sm">restart_alt</span>
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const PortfolioGridItem = ({ item, onClick }: { item: PortfolioItem; onClick: (item: PortfolioItem) => void }) => {
+  const [isHovering, setIsHovering] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleMouseEnter = () => {
+    setIsHovering(true);
+    // Use a small timeout to avoid rapid toggling performance issues
+    setTimeout(() => {
+        if(videoRef.current) {
+            videoRef.current.currentTime = 0;
+            videoRef.current.play().catch(() => {}); // catch promise errors if unmounted
+        }
+    }, 50);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    if(videoRef.current) {
+        videoRef.current.pause();
+    }
+  };
+
+  const isVideo = item.type === 'video' || item.type === 'reel';
+
+  // Helper icon
+  const getIconForType = (type: MediaType) => {
+    switch (type) {
+      case 'video': return 'play_arrow';
+      case 'reel': return 'movie'; 
+      case 'audio': return 'music_note';
+      default: return 'zoom_in';
+    }
+  };
+
+  return (
+    <div
+      onClick={() => onClick(item)}
+      onMouseEnter={isVideo ? handleMouseEnter : undefined}
+      onMouseLeave={isVideo ? handleMouseLeave : undefined}
+      className="group relative aspect-square rounded-lg overflow-hidden bg-white/5 border border-white/5 cursor-pointer hover:border-primary/50 transition-colors z-0"
+    >
+        {/* Render Video if hovering and supported */}
+        {isVideo && isHovering ? (
+            <div className="w-full h-full animate-in fade-in duration-300">
+                <video
+                    ref={videoRef}
+                    src={item.src}
+                    className="w-full h-full object-cover"
+                    muted
+                    loop
+                    playsInline
+                />
+            </div>
+        ) : (
+            <img
+                src={item.thumb}
+                alt={item.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+        )}
+
+        {/* Icon Overlay (hidden if video playing to allow clear view, but visible for non-video or initial state) */}
+        {(!isVideo || !isHovering) && (
+             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                 <div className="size-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                     <span className="material-symbols-outlined text-white filled">
+                        {getIconForType(item.type)}
+                     </span>
+                 </div>
+             </div>
+        )}
+        
+        {/* Type Badge */}
+        <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur text-[10px] font-bold uppercase text-white/80 pointer-events-none">
+            {item.type}
+        </div>
+    </div>
+  );
+};
+
+
 const ArtistProfile: React.FC = () => {
   // Main State
   const [artist, setArtist] = useState(initialArtist);
@@ -114,6 +275,14 @@ const ArtistProfile: React.FC = () => {
   const [isAddTrackOpen, setIsAddTrackOpen] = useState(false);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  
+  // Add Media Custom Dropdown State
+  const [mediaType, setMediaType] = useState<MediaType>('image');
+  const [isMediaTypeDropdownOpen, setIsMediaTypeDropdownOpen] = useState(false);
+
+  // Booking Modal Dropdown State
+  const [bookingEventType, setBookingEventType] = useState("Live Performance");
+  const [isBookingTypeDropdownOpen, setIsBookingTypeDropdownOpen] = useState(false);
 
   // Refs for file inputs
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -214,16 +383,6 @@ const ArtistProfile: React.FC = () => {
           setIsBookingOpen(false);
           alert(`Booking request sent to ${artist.name}!`);
       }, 1000);
-  };
-
-  // Helper
-  const getIconForType = (type: MediaType) => {
-    switch (type) {
-      case 'video': return 'play_arrow';
-      case 'reel': return 'movie'; 
-      case 'audio': return 'music_note';
-      default: return null;
-    }
   };
 
   const filteredPortfolio = portfolioItems.filter(item => 
@@ -456,26 +615,13 @@ const ArtistProfile: React.FC = () => {
                            
                            {filteredPortfolio.length > 0 ? (
                                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-                                   {filteredPortfolio.map((item) => {
-                                       const typeIcon = getIconForType(item.type);
-                                       return (
-                                           <div 
-                                             key={item.id} 
-                                             onClick={() => setSelectedItem(item)}
-                                             className="group relative aspect-square rounded-lg overflow-hidden bg-white/5 border border-white/5 cursor-pointer hover:border-primary/50 transition-colors"
-                                            >
-                                               <img src={item.thumb} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                                               
-                                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                                   {typeIcon && (
-                                                       <div className="size-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center border border-white/20">
-                                                           <span className="material-symbols-outlined text-white filled">{typeIcon}</span>
-                                                       </div>
-                                                   )}
-                                               </div>
-                                           </div>
-                                       );
-                                   })}
+                                   {filteredPortfolio.map((item) => (
+                                       <PortfolioGridItem 
+                                          key={item.id} 
+                                          item={item} 
+                                          onClick={(it) => setSelectedItem(it)} 
+                                       />
+                                   ))}
                                </div>
                            ) : (
                                <div className="w-full flex flex-col items-center justify-center h-[200px] text-center bg-white/[0.02] rounded-xl border border-white/5">
@@ -647,14 +793,36 @@ const ArtistProfile: React.FC = () => {
                     <button onClick={() => setIsAddMediaOpen(false)}><span className="material-symbols-outlined text-white/50 hover:text-white">close</span></button>
                 </div>
                 <form onSubmit={handleAddMedia} className="p-6 space-y-4">
-                    <div>
+                    <div className="relative">
                         <label className="block text-xs font-bold text-white/50 uppercase mb-1">Media Type</label>
-                        <select name="type" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary">
-                            <option value="image">Image</option>
-                            <option value="video">Video</option>
-                            <option value="reel">Reel</option>
-                            <option value="audio">Audio</option>
-                        </select>
+                        <input type="hidden" name="type" value={mediaType} />
+                        <div 
+                            onClick={() => setIsMediaTypeDropdownOpen(!isMediaTypeDropdownOpen)}
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors"
+                        >
+                            <span className="capitalize">{mediaType}</span>
+                            <span className="material-symbols-outlined text-white/50 text-[20px] transition-transform duration-200" style={{ transform: isMediaTypeDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>expand_more</span>
+                        </div>
+                        {isMediaTypeDropdownOpen && (
+                            <>
+                                <div className="fixed inset-0 z-40" onClick={() => setIsMediaTypeDropdownOpen(false)}></div>
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-[#181a1d] border border-white/10 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-48 overflow-y-auto custom-scrollbar">
+                                    {['image', 'video', 'reel', 'audio'].map((type) => (
+                                        <div 
+                                            key={type}
+                                            onClick={() => {
+                                                setMediaType(type as MediaType);
+                                                setIsMediaTypeDropdownOpen(false);
+                                            }}
+                                            className={`px-4 py-2.5 text-sm cursor-pointer hover:bg-white/5 capitalize flex items-center justify-between transition-colors ${mediaType === type ? 'text-primary bg-white/[0.02]' : 'text-white/80'}`}
+                                        >
+                                            {type}
+                                            {mediaType === type && <span className="material-symbols-outlined text-[16px] filled">check</span>}
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-white/50 uppercase mb-1">Title</label>
@@ -747,35 +915,72 @@ const ArtistProfile: React.FC = () => {
       {/* Booking Modal */}
       {isBookingOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-[#121418] border border-white/10 rounded-2xl w-full max-w-md">
-                <div className="p-6 border-b border-white/5 flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-white">Book {artist.name}</h3>
-                    <button onClick={() => setIsBookingOpen(false)}><span className="material-symbols-outlined text-white/50 hover:text-white">close</span></button>
+            <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-[#333] rounded-2xl w-full max-w-md transition-colors duration-200">
+                <div className="p-6 border-b border-gray-100 dark:border-[#333] flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-[#e0e0e0]">Book {artist.name}</h3>
+                    <button onClick={() => setIsBookingOpen(false)}><span className="material-symbols-outlined text-gray-500 dark:text-[#e0e0e0]/50 hover:text-gray-900 dark:hover:text-[#e0e0e0] transition-colors">close</span></button>
                 </div>
                 <form onSubmit={handleBookNow} className="p-6 space-y-4">
-                    <p className="text-white/60 text-sm mb-2">Fill out this form to request a booking. The artist will contact you via your registered email or phone.</p>
+                    <p className="text-gray-600 dark:text-[#e0e0e0]/60 text-sm mb-2">Fill out this form to request a booking. The artist will contact you via your registered email or phone.</p>
+                    
+                    {/* Event Type Custom Dropdown */}
+                    <div className="relative">
+                        <label className="block text-xs font-bold text-gray-500 dark:text-[#e0e0e0]/50 uppercase mb-1">Event Type</label>
+                        <input type="hidden" name="eventType" value={bookingEventType} />
+                        <div 
+                            onClick={() => setIsBookingTypeDropdownOpen(!isBookingTypeDropdownOpen)}
+                            className="w-full bg-gray-50 dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#333] rounded-lg px-4 py-3 text-gray-900 dark:text-[#e0e0e0] flex items-center justify-between cursor-pointer hover:border-gray-300 dark:hover:border-[#555] transition-all duration-200"
+                        >
+                            <span>{bookingEventType}</span>
+                            <span className={`material-symbols-outlined text-gray-400 dark:text-[#888] text-[20px] transition-transform duration-200 ${isBookingTypeDropdownOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                        </div>
+                        
+                        {isBookingTypeDropdownOpen && (
+                            <>
+                                <div className="fixed inset-0 z-40" onClick={() => setIsBookingTypeDropdownOpen(false)}></div>
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#333] rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                    {['Live Performance', 'Studio Session', 'Private Event', 'Workshop'].map((type) => (
+                                        <div 
+                                            key={type}
+                                            onClick={() => {
+                                                setBookingEventType(type);
+                                                setIsBookingTypeDropdownOpen(false);
+                                            }}
+                                            className={`px-4 py-2.5 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333] flex items-center justify-between transition-colors ${bookingEventType === type ? 'text-primary font-bold' : 'text-gray-700 dark:text-[#e0e0e0]'}`}
+                                        >
+                                            {type}
+                                            {bookingEventType === type && <span className="material-symbols-outlined text-[16px] filled">check</span>}
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+
                     <div>
-                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Event Type</label>
-                        <select className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary">
-                            <option>Live Performance</option>
-                            <option>Studio Session</option>
-                            <option>Private Event</option>
-                            <option>Workshop</option>
-                        </select>
+                        <label className="block text-xs font-bold text-gray-500 dark:text-[#e0e0e0]/50 uppercase mb-1">Preferred Date</label>
+                        <input 
+                            type="date" 
+                            required 
+                            className="w-full bg-gray-50 dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#333] rounded-lg px-4 py-3 text-gray-900 dark:text-[#e0e0e0] placeholder-gray-400 dark:placeholder-[#888] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200" 
+                        />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Preferred Date</label>
-                        <input type="date" required className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                        <label className="block text-xs font-bold text-gray-500 dark:text-[#e0e0e0]/50 uppercase mb-1">Budget (Approx)</label>
+                        <input 
+                            placeholder="e.g. ₹50,000" 
+                            className="w-full bg-gray-50 dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#333] rounded-lg px-4 py-3 text-gray-900 dark:text-[#e0e0e0] placeholder-gray-400 dark:placeholder-[#888] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200" 
+                        />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Budget (Approx)</label>
-                        <input placeholder="e.g. ₹50,000" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary" />
+                        <label className="block text-xs font-bold text-gray-500 dark:text-[#e0e0e0]/50 uppercase mb-1">Message</label>
+                        <textarea 
+                            rows={3} 
+                            placeholder="Tell us more about the event..." 
+                            className="w-full bg-gray-50 dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#333] rounded-lg px-4 py-3 text-gray-900 dark:text-[#e0e0e0] placeholder-gray-400 dark:placeholder-[#888] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none transition-all duration-200" 
+                        />
                     </div>
-                    <div>
-                        <label className="block text-xs font-bold text-white/50 uppercase mb-1">Message</label>
-                        <textarea rows={3} placeholder="Tell us more about the event..." className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary resize-none" />
-                    </div>
-                    <button type="submit" className="w-full bg-primary text-background-dark font-bold py-3 rounded-xl hover:brightness-110 mt-2">Send Request</button>
+                    <button type="submit" className="w-full bg-primary text-black font-bold py-3 rounded-xl hover:brightness-110 transition-all duration-200 mt-2 shadow-lg hover:shadow-primary/20">Send Request</button>
                 </form>
             </div>
         </div>
@@ -788,7 +993,7 @@ const ArtistProfile: React.FC = () => {
             onClick={() => setSelectedItem(null)}
           >
               <button 
-                  className="absolute top-6 right-6 z-20 size-12 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+                  className="absolute top-6 right-6 z-20 size-12 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors pointer-events-auto"
                   onClick={(e) => { e.stopPropagation(); setSelectedItem(null); }}
               >
                   <span className="material-symbols-outlined text-3xl">close</span>
@@ -817,11 +1022,8 @@ const ArtistProfile: React.FC = () => {
                                <audio src={selectedItem.src} controls className="w-full" />
                           </div>
                       ) : (
-                          <img 
-                            src={selectedItem.src} 
-                            alt={selectedItem.title} 
-                            className="w-full h-full object-contain max-h-[90vh]"
-                          />
+                          // Replaced standard img with new ImageViewer component
+                          <ImageViewer src={selectedItem.src} alt={selectedItem.title} />
                       )}
                   </div>
 
