@@ -420,19 +420,28 @@ const ArtistProfile: React.FC = () => {
                                    
                                    {/* Filters */}
                                    <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/10 overflow-x-auto hide-scrollbar">
-                                        {(['all', 'image', 'video', 'reel', 'audio'] as const).map((filter) => (
-                                            <button
-                                                key={filter}
-                                                onClick={() => setPortfolioFilter(filter)}
-                                                className={`px-3 py-1.5 rounded-md text-xs font-bold capitalize transition-all whitespace-nowrap ${
-                                                    portfolioFilter === filter 
-                                                    ? 'bg-white/10 text-white shadow-sm' 
-                                                    : 'text-white/40 hover:text-white'
-                                                }`}
-                                            >
-                                                {filter === 'all' ? 'All' : filter + 's'}
-                                            </button>
-                                        ))}
+                                        {(['all', 'image', 'video', 'reel', 'audio'] as const).map((filter) => {
+                                            const label = {
+                                                all: 'All',
+                                                image: 'Images',
+                                                video: 'Videos',
+                                                reel: 'Reels',
+                                                audio: 'Audio'
+                                            }[filter];
+                                            return (
+                                                <button
+                                                    key={filter}
+                                                    onClick={() => setPortfolioFilter(filter)}
+                                                    className={`px-3 py-1.5 rounded-md text-xs font-bold capitalize transition-all whitespace-nowrap ${
+                                                        portfolioFilter === filter 
+                                                        ? 'bg-white/10 text-white shadow-sm' 
+                                                        : 'text-white/40 hover:text-white'
+                                                    }`}
+                                                >
+                                                    {label}
+                                                </button>
+                                            );
+                                        })}
                                    </div>
                                </div>
 
@@ -532,30 +541,36 @@ const ArtistProfile: React.FC = () => {
                                          <span className="material-symbols-outlined text-[16px]">add</span> Add Event
                                      </button>
                                   </div>
-                                  {events.map((evt) => (
-                                      <div key={evt.id} className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                                          <div className="flex-shrink-0 w-full sm:w-20 h-20 bg-white/5 rounded-lg flex flex-col items-center justify-center border border-white/10">
-                                              <span className="text-primary font-bold text-xl">{new Date(evt.date).getDate()}</span>
-                                              <span className="text-white/50 text-xs uppercase font-bold">{new Date(evt.date).toLocaleString('default', { month: 'short' })}</span>
-                                          </div>
-                                          <div className="flex-1">
-                                              <h4 className="font-bold text-white text-lg">{evt.title}</h4>
-                                              <div className="flex items-center gap-2 text-white/60 text-sm mt-1">
-                                                  <span className="material-symbols-outlined text-[16px]">apartment</span>
-                                                  {evt.venue}
+                                  {events.map((evt) => {
+                                      // Safely parse local date to avoid timezone shift
+                                      const [year, month, day] = evt.date.split('-').map(Number);
+                                      const eventDate = new Date(year, month - 1, day);
+                                      
+                                      return (
+                                          <div key={evt.id} className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                                              <div className="flex-shrink-0 w-full sm:w-20 h-20 bg-white/5 rounded-lg flex flex-col items-center justify-center border border-white/10">
+                                                  <span className="text-primary font-bold text-xl">{eventDate.getDate()}</span>
+                                                  <span className="text-white/50 text-xs uppercase font-bold">{eventDate.toLocaleString('default', { month: 'short' })}</span>
                                               </div>
-                                              <div className="flex items-center gap-2 text-white/60 text-sm mt-1">
-                                                  <span className="material-symbols-outlined text-[16px]">location_on</span>
-                                                  {evt.location}
+                                              <div className="flex-1">
+                                                  <h4 className="font-bold text-white text-lg">{evt.title}</h4>
+                                                  <div className="flex items-center gap-2 text-white/60 text-sm mt-1">
+                                                      <span className="material-symbols-outlined text-[16px]">apartment</span>
+                                                      {evt.venue}
+                                                  </div>
+                                                  <div className="flex items-center gap-2 text-white/60 text-sm mt-1">
+                                                      <span className="material-symbols-outlined text-[16px]">location_on</span>
+                                                      {evt.location}
+                                                  </div>
+                                              </div>
+                                              <div className="flex items-center sm:self-center">
+                                                  <button className="px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-lg text-sm font-bold hover:bg-primary/20 transition-colors">
+                                                      Tickets
+                                                  </button>
                                               </div>
                                           </div>
-                                          <div className="flex items-center sm:self-center">
-                                              <button className="px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-lg text-sm font-bold hover:bg-primary/20 transition-colors">
-                                                  Tickets
-                                              </button>
-                                          </div>
-                                      </div>
-                                  ))}
+                                      );
+                                  })}
                                </div>
                            ) : (
                                <div className="flex flex-col items-center justify-center h-[300px] text-center bg-white/[0.02] rounded-2xl border border-white/5">
