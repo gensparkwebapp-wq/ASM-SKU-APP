@@ -86,38 +86,48 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
           <div className="relative" ref={dropdownRef}>
             <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 rounded-full border border-white/10 p-1 pr-3 hover:bg-white/5 transition-colors group bg-black/20 backdrop-blur-sm"
+                className={`flex items-center gap-2 rounded-full border p-1 pr-3 transition-all group bg-black/20 backdrop-blur-sm ${isDropdownOpen ? 'border-primary/50 bg-white/5' : 'border-white/10 hover:bg-white/5'}`}
+                aria-haspopup="true"
+                aria-expanded={isDropdownOpen}
             >
                 <div className="size-8 rounded-full bg-gradient-to-tr from-primary to-blue-500 p-[1px]">
                      <img 
-                       src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_Y5JfKRXBOeZjY--cYTp30tSf5OUWOHWUy5Od0E1jnn65Y7XNlZne080-NmjZkCGRFSaNeAJMruju49u5MYyLFG9RDsiCF8OAQ1QdbOErvDKF14fNQpXtPzennUI85pgepruSTg1suZlk0-4uCZxN0jrwSs_T6GoGrnBvp8Zlspv5HdSnvY5IqukDMTDwVEhb6w-ftRcsK0lJCbFDEQfuC4GFvS3lusZpq-DftBN-ftD2qoVbyjI_FvFQCF3EBaHoDzyAlBcp-cs" 
+                       src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&q=80" 
                        alt="User" 
                        className="w-full h-full rounded-full object-cover"
                      />
                 </div>
                 <span className="text-sm font-bold text-white hidden sm:block">Arjun</span>
-                <span className={`material-symbols-outlined text-white/50 text-[18px] transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                <span className={`material-symbols-outlined text-white/50 text-[18px] transition-transform duration-300 ${isDropdownOpen ? 'rotate-180 text-primary' : ''}`}>expand_more</span>
             </button>
 
             {/* Dropdown Menu */}
             {isDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-[#121418] border border-white/10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-[60]">
-                    <div className="p-3 border-b border-white/5 bg-white/[0.02]">
+                <div className="absolute right-0 top-full mt-2 w-60 rounded-xl bg-[#121418] border border-white/10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-[60] ring-1 ring-white/5">
+                    <div className="p-4 border-b border-white/5 bg-white/[0.02]">
                         <p className="text-sm font-bold text-white">Arjun Mehta</p>
-                        <p className="text-xs text-white/40 truncate">arjun.mehta@example.com</p>
+                        <p className="text-xs text-white/40 truncate mt-0.5">arjun.mehta@example.com</p>
+                        <div className="mt-3 flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/20">PRO MEMBER</span>
+                        </div>
                     </div>
                     <div className="p-1.5">
-                        <button className="w-full text-left px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg flex items-center gap-3 transition-colors group">
-                            <span className="material-symbols-outlined text-[20px] text-white/50 group-hover:text-primary transition-colors">person</span>
+                        <button className="w-full text-left px-3 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-3 transition-colors group">
+                            <span className="material-symbols-outlined text-[20px] text-white/40 group-hover:text-primary transition-colors">person</span>
                             My Profile
                         </button>
-                        <button className="w-full text-left px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg flex items-center gap-3 transition-colors group">
-                            <span className="material-symbols-outlined text-[20px] text-white/50 group-hover:text-primary transition-colors">settings</span>
+                        <button className="w-full text-left px-3 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-3 transition-colors group">
+                            <span className="material-symbols-outlined text-[20px] text-white/40 group-hover:text-primary transition-colors">settings</span>
                             Settings
+                        </button>
+                        <button className="w-full text-left px-3 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-3 transition-colors group">
+                            <span className="material-symbols-outlined text-[20px] text-white/40 group-hover:text-primary transition-colors">notifications</span>
+                            Notifications
+                            <span className="ml-auto size-2 rounded-full bg-red-500"></span>
                         </button>
                     </div>
                     <div className="p-1.5 border-t border-white/5">
-                        <button className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg flex items-center gap-3 transition-colors">
+                        <button className="w-full text-left px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 rounded-lg flex items-center gap-3 transition-colors">
                             <span className="material-symbols-outlined text-[20px]">logout</span>
                             Logout
                         </button>
