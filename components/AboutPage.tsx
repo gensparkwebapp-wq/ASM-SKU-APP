@@ -4,22 +4,22 @@ const team = [
   { 
     name: "Arjun Mehta", 
     role: "President", 
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCoMbv8LaODM65jb82pRyGYmPFaniqRq50NXvRQPu6lK_oFxtxGNc6eeLpF3jz3EH8eMLar-bhYuEVvKUahru8f8lLgrt0CVV5fpDH4iseAQNLXYRIZ3un8wYPgBSi8Fm7yUljjhTCUkLgAMzGaL8Qt8eM1qSJ0d8sfv6tZ_ErLyPsEJ49AYtJmSlXem8MLh14MxQDHoKK_OoN-oDsz6t4lyphlNruu1jRPJ_q03xqT3Sy1gFNnhyrZGoOxmGCx5_V25BKyAQ7qcI8" 
+    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&q=80" 
   },
   { 
     name: "Priya Singh", 
     role: "Vice President", 
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAnavj-pz28wdg5tVrtjt-dIcW6L1F7uKHBgW-_PI32MA9G65-JKfaXTMOn_4TrMc_ItV3Afw4IQ0I4SStlWqV3lJy04oiTafWKiYcm7Qls17SZhg5PKTyLbTXCEP7d-eqakI_yAk8JjogW7Wz-X89RPcB6-8orVZJ6WmSyrnRMAgHZG8tJBUaz9-NHd-zJ6QeXiY-_KlXF5iBCUex11PGGBlutXfxTo71-7umIX6dYqN2N9DP8QMhdkYBwL1bu0eIaH0nR8qwaepk" 
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&q=80" 
   },
   { 
     name: "Rohan Das", 
     role: "Treasurer", 
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuASjfGuSONgzGLWuTBL_Bp0Zny0DFqWdOQnCJISopOWRuts6CsQbnnZi-zSEEWGPThtJmE0aa2atkGe9ivDjohayFgvTcuDF5EpF8uf4ZT3WLxoRsWxAFRj84U5fuNZbINV0kGqyKB9-G4lLffAe0ie2uw8lvUfPVY2rWxOlz9pyOfcoEPhuS3Q0loehEHzJ_nmOj6R6Y5dN09IEzcwC-PtfR-Zq5xN_TOU_dud8GUrOZ1q57rf1DmRhW5akFg-3KC6HUmsvbY0iJc" 
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&q=80" 
   },
   { 
     name: "Sana Khan", 
     role: "Secretary", 
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCvCM5q41NbkWEz3XQOrGeE10kjvwok_HjjjTJWHbfEDFx4Ml-KRuFyTCbLTYQhlxuniJYSSJhzT2QC6nq3JxQxlrhnVZ6HdcyLYMOuBbAszpTfcPse75bpmLMdMDz2LMv_lAQAnHiqc_iES6lyYFETOTZkAdD9M-ftgEN17El3TDSkGWwoYbesXC9xNnjxYDzTUpXj2s8Oqb1QX2MFzEpGp8gqjQNXFq3fsTFcIfCEcmlFnOKyy46pzmtU40uwnQr7IVr5UYpbIDU" 
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&q=80" 
   },
 ];
 

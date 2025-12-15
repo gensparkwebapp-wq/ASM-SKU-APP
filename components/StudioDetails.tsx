@@ -68,6 +68,15 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
   const [userComment, setUserComment] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Gallery State
+  const [galleryImages, setGalleryImages] = useState<string[]>([
+    studio.image,
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuAnavj-pz28wdg5tVrtjt-dIcW6L1F7uKHBgW-_PI32MA9G65-JKfaXTMOn_4TrMc_ItV3Afw4IQ0I4SStlWqV3lJy04oiTafWKiYcm7Qls17SZhg5PKTyLbTXCEP7d-eqakI_yAk8JjogW7Wz-X89RPcB6-8orVZJ6WmSyrnRMAgHZG8tJBUaz9-NHd-zJ6QeXiY-_KlXF5iBCUex11PGGBlutXfxTo71-7umIX6dYqN2N9DP8QMhdkYBwL1bu0eIaH0nR8qwaepk",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuASjfGuSONgzGLWuTBL_Bp0Zny0DFqWdOQnCJISopOWRuts6CsQbnnZi-zSEEWGPThtJmE0aa2atkGe9ivDjohayFgvTcuDF5EpF8uf4ZT3WLxoRsWxAFRj84U5fuNZbINV0kGqyKB9-G4lLffAe0ie2uw8lvUfPVY2rWxOlz9pyOfcoEPhuS3Q0loehEHzJ_nmOj6R6Y5dN09IEzcwC-PtfR-Zq5xN_TOU_dud8GUrOZ1q57rf1DmRhW5akFg-3KC6HUmsvbY0iJc",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCvCM5q41NbkWEz3XQOrGeE10kjvwok_HjjjTJWHbfEDFx4Ml-KRuFyTCbLTYQhlxuniJYSSJhzT2QC6nq3JxQxlrhnVZ6HdcyLYMOuBbAszpTfcPse75bpmLMdMDz2LMv_lAQAnHiqc_iES6lyYFETOTZkAdD9M-ftgEN17El3TDSkGWwoYbesXC9xNnjxYDzTUpXj2s8Oqb1QX2MFzEpGp8gqjQNXFq3fsTFcIfCEcmlFnOKyy46pzmtU40uwnQr7IVr5UYpbIDU"
+  ]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Audio Player State
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -127,6 +136,22 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
         setUserRating(5);
         setIsSubmitting(false);
     }, 1500);
+  };
+
+  // File Upload Handler
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            setGalleryImages(prev => [e.target!.result as string, ...prev]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
   };
 
   // Audio Player Helpers
@@ -386,6 +411,41 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
                onEnded={() => setIsPlaying(false)}
                onLoadedMetadata={handleTimeUpdate}
              />
+          </div>
+
+          {/* Studio Gallery Section */}
+          <div className="glass-card p-6 md:p-8 rounded-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white">Studio Gallery</h3>
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-bold transition-all text-white group"
+              >
+                <span className="material-symbols-outlined text-[18px] group-hover:text-primary transition-colors">add_photo_alternate</span>
+                <span>Add Photos</span>
+              </button>
+              <input 
+                  type="file" 
+                  multiple 
+                  accept="image/*" 
+                  className="hidden" 
+                  ref={fileInputRef} 
+                  onChange={handleFileUpload} 
+              />
+            </div>
+
+            <div className="columns-2 md:columns-3 gap-4 space-y-4">
+              {galleryImages.map((src, index) => (
+                <div key={index} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-black/20 border border-white/5">
+                   <img 
+                      src={src} 
+                      alt={`Gallery ${index}`} 
+                      className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500" 
+                   />
+                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none"></div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Amenities Section */}
