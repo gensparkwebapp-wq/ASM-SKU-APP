@@ -13,54 +13,44 @@ const ads: Ad[] = [
     title: "New Album Launch",
     brand: "Sony Music",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBrPdErdSK5U2vnFD0wG8cPDOWR-plB3eS2QS_tC870s2JjKVMHZWWGKRjF_PjSu2OkLpqX01x6fApt-Zs4y8S54UTpeAhXSSKeHf6OClynhJquMPSipZhDuGetTtE6tnE_A7DTBptRAe_ZHW6k1SYZZ8vEVa6oEWdQHGlL32FS8v1ILfLvZYhQI9x0NDI8YUc3jtGvjrJXtH4OYreoSzyaSmS0f5fj4FgFrtp8IWB53Qp3Gh4SyxnZ3pLWizFppcQZxN7ObQsf7MQ",
+      "https://images.unsplash.com/photo-1593697821252-0c917daf3453?w=600&h=600&fit=crop&q=80",
   },
   {
     id: 2,
     title: "Best Microphones",
     brand: "AudioTechnica",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuA8UkrozxYO53bUMAyV6Izc6SRb7x7IyeEzh4CZI23kKa9gzgMGT64RdID4gGcgIY-jaafc_vHRZr9NERkmwdIOJD-gFFNmQjz95adw_b-XYUM_YkizaATRA9zkjP_bciKrQnF6wokvkAU51lS11S0UEfHsJ4Y121t7_ijLhE03Sh5LiqyH7_MtrjYS8AjrMas9vFgnT-8Ad8g_xiCiG4fJGDfonlU5IKRpQxwn6tZNj9_CLhTmcJuxsB_I13fJgfDvtlK5b413bSs",
+      "https://images.unsplash.com/photo-1590602334926-2d1a37c8a32a?w=600&h=600&fit=crop&q=80",
   },
   {
     id: 3,
     title: "Learn Guitar Fast",
     brand: "Udemy Music",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBIDMvtADemTQ9qpeDEy1riNXjRUUvvD_d3wB4tgyM2-JWqaUji0m_KwFiVGmy1ENEmMrGSZn_tvCU5-Ap0Mu-FZPJtQksHp94596i8uAlOQ2gZbCu0Tt-GZpk9ww54J6FbZGim1je_6uKXDT8dLQ8rWWo4Rtz46cE7kIqe_GR1TP4v25CUwIaKk6fbPemI5DBdDtCvZQmKuHHKL_AlQQhPiVPoDAOBI3_banqsxjj6h6oIJVtPJmF3mAJ9WjInIToeLmM4Qq68DGE",
+      "https://images.unsplash.com/photo-1525201548942-d8732f6617a0?w=600&h=600&fit=crop&q=80",
   },
   {
     id: 4,
     title: "Talent Hunt 2025",
     brand: "Star Plus",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBla_ZGuWiHMOklsvrLLFAupppKg3RsflHWkGnIMs8ItuC756yT8W-RwXOmV_7LGbjeplUbBkxqKwRrR9Yd4aMw99FO-cG_NDJG8DXhTfrDVPpma6C0CkdpjlXKI9sGMXtrbOEeTWMRsWXOlHFFTgeTv5DUKOHn8_0g_6V5FzvKrL-cv27RiCk5ZUT4NLPUV8LSKq0iqec_dp-KUtPvA64reIzK6zTtlfsSFxVN6NyJar0TczHl1PZZ4YhD7nponQ9ErUOSHQiKlRc",
+      "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=600&h=600&fit=crop&q=80",
   },
 ];
 
 const PromotionsSection: React.FC = () => {
-  const [activeAdId, setActiveAdId] = useState<number>(1);
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    // Reset progress when active ad changes
-    setProgress(0);
-    const timer = setTimeout(() => {
-      setProgress(100);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [activeAdId]);
+  const [activeAdId] = useState<number>(1);
 
   return (
-    <section className="container mx-auto px-4 max-w-[1280px]">
-      <div className="flex flex-col mb-8 px-2">
+    <section className="container mx-auto px-4 max-w-[1400px]">
+      <div className="flex flex-col mb-8">
         <div className="flex items-center gap-3 mb-1">
           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#F4B400] text-black tracking-wider uppercase">
             Sponsored
           </span>
-          <h2 className="text-3xl font-bold tracking-tight">Artist Promotions</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Artist Promotions</h2>
         </div>
-        <p className="text-white/50 text-sm ml-1">
+        <p className="text-white/50 text-sm">
           Featured content from our partners
         </p>
       </div>
@@ -72,59 +62,30 @@ const PromotionsSection: React.FC = () => {
           return (
             <div
               key={ad.id}
-              onClick={() => setActiveAdId(ad.id)}
-              className={`glass-card rounded-xl overflow-hidden cursor-pointer relative group transition-all duration-300 h-full flex flex-col ${
-                isActive ? "ad-active-border" : "border-transparent hover:border-white/10"
+              className={`bg-surface-dark rounded-lg overflow-hidden cursor-pointer group flex flex-col transition-all duration-300 ${
+                isActive ? "ad-active-border" : "border-2 border-transparent hover:border-primary/30"
               }`}
             >
-              <div
-                className="aspect-[4/3] w-full bg-cover bg-center relative bg-gray-900 overflow-hidden"
-                style={{ backgroundImage: `url("${ad.image}")` }}
-              >
-                {isActive ? (
-                  <>
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center">
-                      <div className="ad-loader mb-3"></div>
-                      <span className="text-xs font-bold tracking-widest text-primary uppercase animate-pulse">
+              <div className="relative"> {/* Wrapper to fix aspect-ratio in flexbox */}
+                <div
+                  className="aspect-square w-full bg-cover bg-center relative bg-gray-900 overflow-hidden"
+                >
+                  <img src={ad.image} alt={ad.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {isActive && (
+                    <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-4">
+                      <span className="text-xs font-bold tracking-widest text-white/80 uppercase">
                         Auto-playing Ad
                       </span>
                     </div>
-                    <div className="absolute bottom-0 left-0 h-1 bg-white/20 w-full">
-                      <div
-                        className="h-full bg-primary"
-                        style={{
-                          width: `${progress}%`,
-                          transition: "width 10s linear",
-                        }}
-                      ></div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all flex items-center justify-center">
-                    <div className="size-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white opacity-80 group-hover:scale-110 transition-transform">
-                      <span className="material-symbols-outlined filled">
-                        play_arrow
-                      </span>
-                    </div>
+                  )}
+                  <div className="absolute top-3 right-3 bg-black/60 px-2 py-0.5 rounded text-[10px] font-bold text-white/70">
+                    Ad
                   </div>
-                )}
-                <div className="absolute top-3 right-3 bg-black/60 px-2 py-0.5 rounded text-[10px] font-bold text-white/70">
-                  Ad
                 </div>
               </div>
 
-              <div
-                className={`p-5 flex flex-col flex-1 ${
-                  isActive
-                    ? "bg-gradient-to-t from-black/80 to-transparent relative"
-                    : "bg-[#121418]"
-                }`}
-              >
-                <h3
-                  className={`text-lg font-bold mb-1 leading-tight transition-colors ${
-                    isActive ? "text-primary" : "text-white group-hover:text-primary"
-                  }`}
-                >
+              <div className="p-4 flex flex-col flex-1">
+                <h3 className="text-lg font-bold mb-1 leading-tight text-white group-hover:text-primary transition-colors truncate">
                   {ad.title}
                 </h3>
                 <p className="text-sm text-gray-400 mb-4">{ad.brand}</p>
@@ -132,7 +93,7 @@ const PromotionsSection: React.FC = () => {
                 <button
                   className={`mt-auto w-full py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2 ${
                     isActive
-                      ? "bg-primary text-background-dark font-bold hover:bg-white hover:text-black"
+                      ? "bg-primary text-background-dark font-bold hover:brightness-110"
                       : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
                   }`}
                 >

@@ -127,10 +127,12 @@ const TopStudios: React.FC<TopStudiosProps> = ({ onViewDetails }) => {
               <div className="glass-card rounded-xl overflow-hidden group h-full flex flex-col hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(43,238,121,0.2)] transition-all duration-300">
                 {/* Image Section */}
                 <div className="relative h-40 w-full overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                    style={{ backgroundImage: `url("${studio.image}")` }}
-                  ></div>
+                  <img
+                    src={studio.image}
+                    alt={studio.name}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
 
                   {/* Favorite Button */}

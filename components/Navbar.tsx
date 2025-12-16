@@ -1,153 +1,138 @@
 import React, { useState, useRef, useEffect } from "react";
 
+type View = 'home' | 'about' | 'my-studios' | 'profile' | 'directory' | 'categories';
+
 interface NavbarProps {
-  onNavigate: (view: 'home' | 'about' | 'my-studios' | 'profile') => void;
+  onNavigate: (view: View) => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulated login state
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleNavClick = (view: View) => {
+    onNavigate(view);
+    setIsMobileMenuOpen(false);
+  };
+
+  const NavLinks = () => (
+    <>
+      <button className="text-sm font-medium text-white/80 hover:text-primary transition-colors" onClick={() => handleNavClick('home')}>Home</button>
+      <button className="text-sm font-medium text-white/80 hover:text-primary transition-colors" onClick={() => handleNavClick('directory')}>Artists Directory</button>
+      <button className="text-sm font-medium text-white/80 hover:text-primary transition-colors" onClick={() => { /* Placeholder */ }}>Events</button>
+      <button className="text-sm font-medium text-white/80 hover:text-primary transition-colors" onClick={() => handleNavClick('my-studios')}>Studios</button>
+      <button className="text-sm font-medium text-white/80 hover:text-primary transition-colors" onClick={() => handleNavClick('about')}>About</button>
+    </>
+  );
+
   return (
-    <header className="sticky top-0 z-50 w-full glass border-b-0">
-      <div className="flex h-16 items-center justify-between px-4 md:px-8 max-w-[1280px] mx-auto">
-        <div 
-          className="flex items-center gap-3 cursor-pointer group"
-          onClick={() => onNavigate('home')}
-        >
-          <div className="size-8 text-primary flex items-center justify-center bg-white/5 rounded-full group-hover:bg-primary group-hover:text-background-dark transition-colors">
-            <span className="material-symbols-outlined text-[20px]">
-              graphic_eq
-            </span>
-          </div>
-          <h2 className="text-white text-lg font-bold tracking-wide">
-            Sangeet Kalakar
-          </h2>
+    <>
+      {/* Center: Desktop Nav */}
+      <nav className="hidden lg:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
+        <NavLinks />
+      </nav>
+
+      {/* Right Side: Profile & Mobile Toggle */}
+      <div className="flex items-center gap-4">
+        {/* Profile Button with Dropdown */}
+        <div className="relative" ref={profileMenuRef}>
+          <button 
+            onClick={() => setIsProfileMenuOpen(prev => !prev)}
+            className="size-10 rounded-full border-2 border-white/10 hover:border-primary transition-colors"
+            aria-label="View Profile Menu"
+          >
+            <img 
+              src={isLoggedIn ? "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&q=80" : "https://images.unsplash.com/photo-1549078642-b2c4b3212cde?w=100&h=100&fit=crop&q=80"} 
+              alt="User Profile" 
+              className="w-full h-full object-cover rounded-full"
+            />
+          </button>
+
+          {isProfileMenuOpen && (
+            <div className="absolute top-full right-0 mt-3 w-56 origin-top-right rounded-xl bg-surface-dark border border-white/10 shadow-2xl z-20 animate-in fade-in zoom-in-95 duration-200">
+              <div className="p-2">
+                {isLoggedIn ? (
+                  <>
+                    <div className="px-3 py-2 flex items-center gap-3 border-b border-white/5 mb-1">
+                      <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&q=80" alt="User" loading="lazy" className="size-10 rounded-full object-cover"/>
+                      <div>
+                        <p className="text-sm font-bold text-white">Arjun Mehta</p>
+                        <p className="text-xs text-white/50">@arjun_music</p>
+                      </div>
+                    </div>
+                    <button onClick={() => { handleNavClick('profile'); setIsProfileMenuOpen(false); }} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
+                      <span className="material-symbols-outlined text-base">person</span><span>My Profile</span>
+                    </button>
+                    <button onClick={() => { handleNavClick('categories'); setIsProfileMenuOpen(false); }} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
+                      <span className="material-symbols-outlined text-base">category</span><span>Manage Categories</span>
+                    </button>
+                    <button onClick={() => { /* Placeholder */ setIsProfileMenuOpen(false); }} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
+                      <span className="material-symbols-outlined text-base">settings</span><span>Settings</span>
+                    </button>
+                    <button onClick={() => { setIsLoggedIn(false); setIsProfileMenuOpen(false); }} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-md transition-colors">
+                      <span className="material-symbols-outlined text-base">logout</span><span>Logout</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => { setIsLoggedIn(true); setIsProfileMenuOpen(false); }} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
+                      <span className="material-symbols-outlined text-base">login</span><span>Sign In</span>
+                    </button>
+                    <button className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
+                      <span className="material-symbols-outlined text-base">person_add</span><span>Sign Up</span>
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         
-        {/* Navigation & Search */}
-        <nav className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
-          <button
-            className="text-sm font-medium text-white hover:text-primary transition-colors bg-transparent border-none cursor-pointer"
-            onClick={() => onNavigate('home')}
-          >
-            Home
-          </button>
-          
-          <div className="relative group">
-            <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-3 py-1.5 focus-within:bg-black/40 focus-within:border-primary/50 focus-within:shadow-[0_0_15px_rgba(43,238,121,0.15)] transition-all w-[260px]">
-               <span className="material-symbols-outlined text-white/40 text-[18px] group-focus-within:text-primary transition-colors">search</span>
-               <input 
-                 type="text" 
-                 placeholder="Search studios or artists..." 
-                 className="bg-transparent border-none focus:ring-0 text-sm text-white placeholder-white/30 w-full ml-2 h-auto py-0 leading-normal"
-               />
-            </div>
-          </div>
-
-          <button
-            className="text-sm font-bold text-primary bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 hover:bg-primary/20 transition-all shadow-[0_0_10px_rgba(43,238,121,0.1)] cursor-pointer"
-            onClick={() => onNavigate('my-studios')}
-          >
-            My Studios
-          </button>
-
-          <button
-            className="text-sm font-medium text-white/70 hover:text-primary transition-colors bg-transparent border-none cursor-pointer"
-            onClick={() => onNavigate('home')}
-          >
-            Events
-          </button>
-
-          <button
-            className="text-sm font-medium text-white/70 hover:text-primary transition-colors bg-transparent border-none cursor-pointer"
-            onClick={() => onNavigate('about')}
-          >
-            About
-          </button>
-        </nav>
-
-        <div className="flex items-center gap-3">
-          {/* User Profile Avatar with Dropdown */}
-          <div className="relative" ref={dropdownRef}>
-            <button 
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className={`flex items-center gap-2 rounded-full border p-1 pr-3 transition-all group bg-black/20 backdrop-blur-sm ${isDropdownOpen ? 'border-primary/50 bg-white/5' : 'border-white/10 hover:bg-white/5'}`}
-                aria-haspopup="true"
-                aria-expanded={isDropdownOpen}
-            >
-                <div className="size-8 rounded-full bg-gradient-to-tr from-primary to-blue-500 p-[1px]">
-                     <img 
-                       src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&q=80" 
-                       alt="User" 
-                       className="w-full h-full rounded-full object-cover"
-                     />
-                </div>
-                <span className="text-sm font-bold text-white hidden sm:block">Arjun</span>
-                <span className={`material-symbols-outlined text-white/50 text-[18px] transition-transform duration-300 ${isDropdownOpen ? 'rotate-180 text-primary' : ''}`}>expand_more</span>
-            </button>
-
-            {/* Dropdown Menu */}
-            {isDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-60 rounded-xl bg-[#121418] border border-white/10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-[60] ring-1 ring-white/5">
-                    <div className="p-4 border-b border-white/5 bg-white/[0.02]">
-                        <p className="text-sm font-bold text-white">Arjun Mehta</p>
-                        <p className="text-xs text-white/40 truncate mt-0.5">arjun.mehta@example.com</p>
-                        <div className="mt-3 flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/20">PRO MEMBER</span>
-                        </div>
-                    </div>
-                    <div className="p-1.5">
-                        <button 
-                            onClick={() => {
-                                onNavigate('profile');
-                                setIsDropdownOpen(false);
-                            }}
-                            className="w-full text-left px-3 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-3 transition-colors group"
-                        >
-                            <span className="material-symbols-outlined text-[20px] text-white/40 group-hover:text-primary transition-colors">person</span>
-                            My Profile
-                        </button>
-                        <button className="w-full text-left px-3 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-3 transition-colors group">
-                            <span className="material-symbols-outlined text-[20px] text-white/40 group-hover:text-primary transition-colors">settings</span>
-                            Settings
-                        </button>
-                        <button className="w-full text-left px-3 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-3 transition-colors group">
-                            <span className="material-symbols-outlined text-[20px] text-white/40 group-hover:text-primary transition-colors">notifications</span>
-                            Notifications
-                            <span className="ml-auto size-2 rounded-full bg-red-500"></span>
-                        </button>
-                    </div>
-                    <div className="p-1.5 border-t border-white/5">
-                        <button className="w-full text-left px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 rounded-lg flex items-center gap-3 transition-colors">
-                            <span className="material-symbols-outlined text-[20px]">logout</span>
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            )}
-          </div>
-          
-          <button className="md:hidden text-white ml-2">
-            <span className="material-symbols-outlined">menu</span>
-          </button>
-        </div>
+        {/* Mobile Menu Toggle */}
+        <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden size-10 flex items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors">
+          <span className="material-symbols-outlined">menu</span>
+        </button>
       </div>
-    </header>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm lg:hidden animate-in fade-in duration-300"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <div
+            className="absolute top-0 right-0 h-full w-full max-w-[280px] bg-surface-dark border-l border-white/10 p-6 flex flex-col animate-in slide-in-from-right-full duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="font-bold text-white">Navigation</h3>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="size-10 rounded-full flex items-center justify-center text-white/80 bg-white/5 hover:bg-white/10 hover:text-white transition-all"
+                aria-label="Close menu"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <nav className="flex flex-col gap-2 text-lg [&>button]:text-left [&>button]:p-3 [&>button]:rounded-lg [&>button]:hover:bg-white/5">
+              <NavLinks />
+            </nav>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

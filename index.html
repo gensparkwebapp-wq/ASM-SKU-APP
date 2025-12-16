@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="utf--8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sangeet Kalakar Union</title>
     <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -21,34 +21,37 @@
         theme: {
           extend: {
             colors: {
-              primary: "#2bee79",
-              "background-light": "#f6f8f7",
-              "background-dark": "#102217",
-              "surface-glass": "rgba(255, 255, 255, 0.05)",
-              "surface-glass-hover": "rgba(255, 255, 255, 0.1)",
+              primary: "#22c55e",
+              "background-dark": "#0c1d15",
+              "surface-dark": "#112c20",
+              "border-dark": "rgba(60, 150, 90, 0.2)",
+              "text-placeholder": "rgba(255, 255, 255, 0.4)",
             },
             fontFamily: {
               display: ["Spline Sans", "sans-serif"],
               body: ["Noto Sans", "sans-serif"],
             },
             borderRadius: {
-              DEFAULT: "1rem",
-              lg: "1.5rem",
-              xl: "2rem",
-              "2xl": "3rem",
+              DEFAULT: "0.75rem",
+              lg: "1rem",
+              xl: "1.5rem",
+              "2xl": "2rem",
               full: "9999px",
             },
             backgroundImage: {
               "neon-glow":
-                "radial-gradient(circle at center, rgba(43, 238, 121, 0.15) 0%, rgba(16, 34, 23, 0) 70%)",
+                "radial-gradient(circle at center, rgba(34, 197, 94, 0.15) 0%, rgba(10, 29, 20, 0) 70%)",
             },
           },
         },
       };
     </script>
     <style>
+      html {
+        color-scheme: dark;
+      }
       body {
-        background-color: #102217;
+        background-color: #0c1d15;
         color: white;
         font-family: 'Noto Sans', sans-serif;
       }
@@ -63,30 +66,74 @@
         scrollbar-width: none;
       }
       .glass {
-        background: rgba(17, 34, 24, 0.7);
+        background: rgba(12, 29, 21, 0.5);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(60, 150, 90, 0.1);
       }
       .glass-card {
-        background: linear-gradient(
-          145deg,
-          rgba(255, 255, 255, 0.05) 0%,
-          rgba(255, 255, 255, 0.01) 100%
-        );
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: #112c20;
+        border: 1px solid rgba(60, 150, 90, 0.2);
         transition: all 0.3s ease;
       }
       .glass-card:hover {
-        background: linear-gradient(
-          145deg,
-          rgba(255, 255, 255, 0.1) 0%,
-          rgba(255, 255, 255, 0.02) 100%
-        );
-        border-color: rgba(43, 238, 121, 0.3);
-        transform: translateY(-4px);
-        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        background: #143a28;
+        border-color: rgba(60, 150, 90, 0.4);
+        transform: translateY(-2px);
+      }
+      .filter-select {
+        @apply w-full h-12 px-4 rounded-lg bg-surface-dark border border-border-dark text-white text-sm placeholder:text-text-placeholder focus:outline-none focus:bg-surface-dark focus:border-primary focus:ring-1 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+        color-scheme: dark;
+        caret-color: #22c55e;
+      }
+      /* Fix for white background on autofill/focus for DARK inputs */
+      html.dark .filter-select:-webkit-autofill,
+      html.dark .filter-select:-webkit-autofill:hover,
+      html.dark .filter-select:-webkit-autofill:focus,
+      html.dark .filter-select:-webkit-autofill:active {
+          -webkit-text-fill-color: #FFFFFF !important;
+          -webkit-box-shadow: 0 0 0px 1000px #112c20 inset !important;
+          transition: background-color 5000s ease-in-out 0s;
+          border-color: rgba(60, 150, 90, 0.2) !important;
+          caret-color: #22c55e;
+      }
+       /* Styles for WHITE inputs on Edit Profile page */
+      .edit-input, .edit-textarea {
+        background-color: white !important;
+        color: black !important;
+        border: 1px solid transparent;
+        border-radius: 0.5rem; /* rounded-lg */
+        padding-left: 1rem;
+        padding-right: 1rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        width: 100%;
+        transition: all 0.2s ease-in-out;
+      }
+      .edit-input {
+        height: 2.75rem; /* h-11 */
+      }
+      .edit-textarea {
+         padding-top: 0.75rem;
+         padding-bottom: 0.75rem;
+      }
+      .edit-input:focus, .edit-textarea:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        border-color: #22c55e;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.4);
+      }
+      /* Autofill styles for WHITE inputs */
+      html.dark .edit-input:-webkit-autofill,
+      html.dark .edit-input:-webkit-autofill:hover,
+      html.dark .edit-input:-webkit-autofill:focus,
+      html.dark .edit-input:-webkit-autofill:active {
+          -webkit-text-fill-color: #000000 !important;
+          -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+          transition: background-color 5000s ease-in-out 0s;
+      }
+      .custom-select-option:hover {
+        background-color: rgba(34, 197, 94, 0.1);
       }
       @keyframes loading-spin {
         from {
@@ -98,18 +145,22 @@
       }
       .ad-loader {
         border: 3px solid rgba(255, 255, 255, 0.1);
-        border-top-color: #2bee79;
+        border-top-color: #22c55e;
         border-radius: 50%;
         width: 40px;
         height: 40px;
         animation: loading-spin 1s linear infinite;
       }
       .ad-active-border {
-        border: 1px solid #2bee79;
-        box-shadow: 0 0 15px rgba(43, 238, 121, 0.2);
+        border: 2px solid #22c55e;
+        box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
       }
       .filled {
         font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      @keyframes wave {
+        from { transform: scaleY(0.1); }
+        to { transform: scaleY(1); }
       }
     </style>
   <script type="importmap">
@@ -117,10 +168,12 @@
   "imports": {
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/generative-ai"
   }
 }
 </script>
+<script type="module" src="/index.tsx"></script>
 </head>
   <body>
     <div id="root"></div>

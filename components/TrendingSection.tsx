@@ -54,8 +54,8 @@ const performances: Performance[] = [
 
 const TrendingSection: React.FC = () => {
   return (
-    <section className="container mx-auto px-4 max-w-[1280px]">
-      <div className="flex items-center justify-between mb-6 px-2">
+    <section className="container mx-auto px-4 max-w-[1400px]">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 bg-primary rounded-full"></div>
           <h2 className="text-2xl font-bold tracking-tight">
@@ -63,22 +63,22 @@ const TrendingSection: React.FC = () => {
           </h2>
         </div>
         <div className="hidden md:flex gap-2">
-          <button className="size-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white transition-colors">
+          <button className="size-10 rounded-full border border-white/10 flex items-center justify-center bg-surface-dark/50 hover:bg-white/10 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined">chevron_left</span>
           </button>
-          <button className="size-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white transition-colors">
+          <button className="size-10 rounded-full border border-white/10 flex items-center justify-center bg-surface-dark/50 hover:bg-white/10 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
       </div>
-      <div className="flex overflow-x-auto hide-scrollbar gap-6 pb-4 snap-x snap-mandatory">
+      <div className="flex overflow-x-auto hide-scrollbar gap-6 pb-4 -mx-4 px-4 snap-x snap-mandatory">
         {performances.map((item) => (
-          <div key={item.id} className="min-w-[280px] md:min-w-[340px] snap-center">
-            <div className="glass-card rounded-xl overflow-hidden group cursor-pointer relative">
+          <div key={item.id} className="min-w-[280px] md:min-w-[320px] snap-start">
+            <div className="bg-surface-dark rounded-lg overflow-hidden group cursor-pointer h-full flex flex-col border border-transparent hover:border-primary/30 transition-all">
               <div
                 className="aspect-video w-full bg-cover bg-center relative"
-                style={{ backgroundImage: `url("${item.image}")` }}
               >
+                <img src={item.image} alt={item.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-all"></div>
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="size-12 rounded-full bg-primary/90 flex items-center justify-center text-background-dark shadow-lg">
@@ -91,16 +91,17 @@ const TrendingSection: React.FC = () => {
                   {item.duration}
                 </div>
               </div>
-              <div className="p-4">
+              <div className="p-4 flex-1 flex flex-col">
                 <h3 className="text-lg font-bold truncate group-hover:text-primary transition-colors">
                   {item.title}
                 </h3>
                 <div className="flex items-center gap-2 mt-2">
-                  <div
-                    className="size-6 rounded-full bg-gray-600 bg-cover"
-                    style={{ backgroundImage: `url("${item.avatar}")` }}
-                  ></div>
-                  <p className="text-sm text-gray-400">{item.venue}</p>
+                  <img
+                    src={item.avatar}
+                    loading="lazy"
+                    className="size-6 rounded-full object-cover"
+                  />
+                  <p className="text-sm text-white/60">{item.venue}</p>
                 </div>
               </div>
             </div>

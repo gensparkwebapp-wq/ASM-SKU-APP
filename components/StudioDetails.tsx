@@ -17,8 +17,10 @@ interface Review {
 }
 
 interface GalleryItem {
+  id: number;
   type: 'image' | 'video';
   src: string;
+  caption: string;
 }
 
 const amenities = [
@@ -75,11 +77,12 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
 
   // Gallery State
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([
-    { type: 'image', src: studio.image },
-    { type: 'image', src: "https://lh3.googleusercontent.com/aida-public/AB6AXuAnavj-pz28wdg5tVrtjt-dIcW6L1F7uKHBgW-_PI32MA9G65-JKfaXTMOn_4TrMc_ItV3Afw4IQ0I4SStlWqV3lJy04oiTafWKiYcm7Qls17SZhg5PKTyLbTXCEP7d-eqakI_yAk8JjogW7Wz-X89RPcB6-8orVZJ6WmSyrnRMAgHZG8tJBUaz9-NHd-zJ6QeXiY-_KlXF5iBCUex11PGGBlutXfxTo71-7umIX6dYqN2N9DP8QMhdkYBwL1bu0eIaH0nR8qwaepk" },
-    { type: 'image', src: "https://lh3.googleusercontent.com/aida-public/AB6AXuASjfGuSONgzGLWuTBL_Bp0Zny0DFqWdOQnCJISopOWRuts6CsQbnnZi-zSEEWGPThtJmE0aa2atkGe9ivDjohayFgvTcuDF5EpF8uf4ZT3WLxoRsWxAFRj84U5fuNZbINV0kGqyKB9-G4lLffAe0ie2uw8lvUfPVY2rWxOlz9pyOfcoEPhuS3Q0loehEHzJ_nmOj6R6Y5dN09IEzcwC-PtfR-Zq5xN_TOU_dud8GUrOZ1q57rf1DmRhW5akFg-3KC6HUmsvbY0iJc" },
-    { type: 'image', src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCvCM5q41NbkWEz3XQOrGeE10kjvwok_HjjjTJWHbfEDFx4Ml-KRuFyTCbLTYQhlxuniJYSSJhzT2QC6nq3JxQxlrhnVZ6HdcyLYMOuBbAszpTfcPse75bpmLMdMDz2LMv_lAQAnHiqc_iES6lyYFETOTZkAdD9M-ftgEN17El3TDSkGWwoYbesXC9xNnjxYDzTUpXj2s8Oqb1QX2MFzEpGp8gqjQNXFq3fsTFcIfCEcmlFnOKyy46pzmtU40uwnQr7IVr5UYpbIDU" }
+    { id: 1, type: 'image', src: studio.image, caption: "Main Control Room" },
+    { id: 2, type: 'image', src: "https://lh3.googleusercontent.com/aida-public/AB6AXuAnavj-pz28wdg5tVrtjt-dIcW6L1F7uKHBgW-_PI32MA9G65-JKfaXTMOn_4TrMc_ItV3Afw4IQ0I4SStlWqV3lJy04oiTafWKiYcm7Qls17SZhg5PKTyLbTXCEP7d-eqakI_yAk8JjogW7Wz-X89RPcB6-8orVZJ6WmSyrnRMAgHZG8tJBUaz9-NHd-zJ6QeXiY-_KlXF5iBCUex11PGGBlutXfxTo71-7umIX6dYqN2N9DP8QMhdkYBwL1bu0eIaH0nR8qwaepk", caption: "Vocal Booth" },
+    { id: 3, type: 'image', src: "https://lh3.googleusercontent.com/aida-public/AB6AXuASjfGuSONgzGLWuTBL_Bp0Zny0DFqWdOQnCJISopOWRuts6CsQbnnZi-zSEEWGPThtJmE0aa2atkGe9ivDjohayFgvTcuDF5EpF8uf4ZT3WLxoRsWxAFRj84U5fuNZbINV0kGqyKB9-G4lLffAe0ie2uw8lvUfPVY2rWxOlz9pyOfcoEPhuS3Q0loehEHzJ_nmOj6R6Y5dN09IEzcwC-PtfR-Zq5xN_TOU_dud8GUrOZ1q57rf1DmRhW5akFg-3KC6HUmsvbY0iJc", caption: "Lounge Area" },
+    { id: 4, type: 'image', src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCvCM5q41NbkWEz3XQOrGeE10kjvwok_HjjjTJWHbfEDFx4Ml-KRuFyTCbLTYQhlxuniJYSSJhzT2QC6nq3JxQxlrhnVZ6HdcyLYMOuBbAszpTfcPse75bpmLMdMDz2LMv_lAQAnHiqc_iES6lyYFETOTZkAdD9M-ftgEN17El3TDSkGWwoYbesXC9xNnjxYDzTUpXj2s8Oqb1QX2MFzEpGp8gqjQNXFq3fsTFcIfCEcmlFnOKyy46pzmtU40uwnQr7IVr5UYpbIDU", caption: "Equipment Rack" }
   ]);
+  const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Audio Player State
@@ -154,12 +157,36 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
             const result = e.target.result as string;
             // Basic detection logic using file.type, fallback to image if unknown
             const type = file.type.startsWith('video/') ? 'video' : 'image';
-            setGalleryItems(prev => [{ type, src: result }, ...prev]);
+            const newItem: GalleryItem = {
+              id: Date.now(),
+              type,
+              src: result,
+              caption: "Newly Added Media"
+            };
+            setGalleryItems(prev => [newItem, ...prev]);
           }
         };
         reader.readAsDataURL(file);
       });
     }
+  };
+
+  const handleUpdateGalleryItem = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingItem) return;
+    const formData = new FormData(e.currentTarget);
+    
+    setGalleryItems(prevItems => prevItems.map(item => 
+      item.id === editingItem.id 
+      ? { 
+          ...item, 
+          src: formData.get('src') as string,
+          caption: formData.get('caption') as string
+        }
+      : item
+    ));
+
+    setEditingItem(null);
   };
 
   // Audio Player Helpers
@@ -250,13 +277,16 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
   });
 
   return (
+    <>
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 w-full min-h-screen pb-20">
       {/* Hero Section */}
       <div className="relative h-[40vh] min-h-[300px] w-full">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url("${studio.image}")` }}
-        ></div>
+        <img
+          src={studio.image}
+          alt={`${studio.name} banner`}
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover bg-center"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/50 to-transparent"></div>
         
         {/* Navigation Bar */}
@@ -443,8 +473,8 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
             </div>
 
             <div className="columns-2 md:columns-3 gap-4 space-y-4">
-              {galleryItems.map((item, index) => (
-                <div key={index} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-black/20 border border-white/5">
+              {galleryItems.map((item) => (
+                <div key={item.id} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-black/20 border border-white/5 cursor-pointer">
                   {item.type === 'video' ? (
                      <div className="relative group/video">
                         <video 
@@ -467,11 +497,25 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
                   ) : (
                     <img 
                       src={item.src} 
-                      alt={`Gallery ${index}`} 
+                      alt={item.caption}
+                      loading="lazy"
                       className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500" 
                     />
                   )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors pointer-events-none"></div>
+                  
+                  {/* Edit Button */}
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setEditingItem(item); }}
+                    className="absolute top-2 left-2 z-10 size-7 rounded-lg bg-black/60 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/80 transition-all"
+                  >
+                    <span className="material-symbols-outlined text-sm">edit</span>
+                  </button>
+                  
+                  {/* Caption */}
+                  <div className="absolute bottom-0 left-0 right-0 p-2.5 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+                    <p className="text-white text-xs font-bold truncate">{item.caption}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -633,7 +677,7 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
                 <div key={review.id} className="border-b border-white/5 pb-6 last:border-0 last:pb-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="flex items-start gap-4">
                     <div className="size-10 rounded-full bg-white/10 overflow-hidden flex-shrink-0">
-                      <img src={review.avatar} alt={review.author} className="w-full h-full object-cover" />
+                      <img src={review.avatar} alt={review.author} loading="lazy" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
@@ -758,11 +802,12 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
                                   key={time}
                                   disabled={isTaken}
                                   onClick={() => setSelectedTime(time)}
+                                  title={isTaken ? "This time slot is unavailable" : `Select ${time}`}
                                   className={`py-2 rounded-lg border text-sm font-medium transition-all ${
                                     isSelected
                                       ? 'bg-primary text-background-dark border-primary shadow-lg'
                                       : isTaken
-                                      ? 'bg-white/5 border-transparent text-white/10 cursor-not-allowed decoration-slice line-through'
+                                      ? 'bg-background-dark border-white/5 text-white/30 cursor-not-allowed line-through'
                                       : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/30'
                                   }`}
                                 >
@@ -808,6 +853,49 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
 
       </div>
     </div>
+
+    {/* Edit Gallery Item Modal */}
+    {editingItem && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="bg-surface-dark border border-white/10 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-surface-dark z-10">
+            <h3 className="text-xl font-bold text-white">Edit Gallery Item</h3>
+            <button onClick={() => setEditingItem(null)}>
+              <span className="material-symbols-outlined text-white/50 hover:text-white">close</span>
+            </button>
+          </div>
+          <form onSubmit={handleUpdateGalleryItem} className="p-6 space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-white/50 uppercase mb-2">Source URL</label>
+              <input
+                name="src"
+                defaultValue={editingItem.src}
+                required
+                placeholder="https://..."
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-white/50 uppercase mb-2">Caption</label>
+              <textarea
+                name="caption"
+                defaultValue={editingItem.caption}
+                rows={3}
+                placeholder="Enter a caption..."
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary resize-none text-sm"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-primary text-background-dark font-bold py-3 rounded-xl hover:brightness-110 mt-4 transition-all"
+            >
+              Save Changes
+            </button>
+          </form>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 

@@ -95,7 +95,7 @@ const AboutPage: React.FC = () => {
              {team.map((member, idx) => (
                <div key={idx} className="glass-card p-6 rounded-2xl flex flex-col items-center text-center group hover:bg-white/[0.07] transition-colors">
                  <div className="size-24 md:size-32 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-primary transition-colors mb-6 shadow-lg">
-                   <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+                   <img src={member.image} alt={member.name} loading="lazy" className="w-full h-full object-cover" />
                  </div>
                  <h4 className="font-bold text-white text-lg mb-1">{member.name}</h4>
                  <span className="text-primary text-sm font-bold uppercase tracking-wider opacity-80">{member.role}</span>
