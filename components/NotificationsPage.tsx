@@ -21,7 +21,7 @@ const NotificationsPage: React.FC = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm"><span className="font-bold">{notif.user}</span> {notif.text}</p>
-              <p className="text-xs text-primary-blue">{notif.time}</p>
+              <p className="text-xs font-semibold text-primary-blue">{notif.time}</p>
             </div>
           </div>
         ))}

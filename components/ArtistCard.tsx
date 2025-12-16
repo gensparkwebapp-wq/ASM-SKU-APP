@@ -8,7 +8,7 @@ interface ArtistCardProps {
   onFollowToggle: (artistId: number) => void;
 }
 
-const ArtistCard: React.FC<ArtistCardProps> = ({ artist, onNavigate, isFollowed, onFollowToggle }) => {
+const ArtistCard: React.FC<ArtistCardProps> = React.memo(({ artist, onNavigate, isFollowed, onFollowToggle }) => {
   const handleViewProfile = (e: React.MouseEvent) => {
     e.stopPropagation();
     onNavigate();
@@ -119,6 +119,6 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, onNavigate, isFollowed,
       </div>
     </div>
   );
-};
+});
 
 export default ArtistCard;

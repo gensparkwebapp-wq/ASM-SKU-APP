@@ -2,11 +2,16 @@ import React from 'react';
 
 const NotFoundPage: React.FC = () => {
   return (
-    <div className="text-center py-20">
-      <h1 className="text-6xl font-bold text-primary-blue">404</h1>
-      <h2 className="text-3xl font-bold mt-4">Page Not Found</h2>
-      <p className="mt-2 text-gray-500 dark:text-text-secondary">Sorry, the page you are looking for does not exist.</p>
-      <a href="#feed" className="mt-6 inline-block px-6 py-3 bg-primary-blue text-white font-bold rounded-lg">Go to Feed</a>
+    <div className="flex flex-col items-center justify-center text-center py-20 min-h-[60vh]">
+      <h1 className="text-8xl font-black text-primary drop-shadow-[0_0_15px_rgba(242,13,13,0.3)]">404</h1>
+      <h2 className="text-4xl font-bold mt-4 text-white">Page Not Found</h2>
+      <p className="mt-2 text-white/60 max-w-sm">Sorry, the page you are looking for does not exist or has been moved.</p>
+      <a 
+        href="#home" 
+        className="mt-8 inline-block px-8 py-3 bg-primary text-background-dark font-bold rounded-full hover:brightness-110 transition-all shadow-lg shadow-primary/20"
+      >
+        Go to Home
+      </a>
     </div>
   );
 };

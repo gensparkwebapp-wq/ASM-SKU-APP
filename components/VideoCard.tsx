@@ -7,7 +7,7 @@ interface VideoCardProps {
   onChannelClick?: (channelName: string) => void;
 }
 
-const VideoCard: React.FC<VideoCardProps> = ({ video, onClick, onChannelClick }) => {
+const VideoCard: React.FC<VideoCardProps> = React.memo(({ video, onClick, onChannelClick }) => {
   const handleChannelClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onChannelClick) {
@@ -57,6 +57,6 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onClick, onChannelClick })
         </div>
     </div>
   );
-};
+});
 
 export default VideoCard;

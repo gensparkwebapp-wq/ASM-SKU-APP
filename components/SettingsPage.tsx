@@ -8,7 +8,7 @@ const SettingsPage: React.FC = () => {
         <div>
           <h3 className="text-lg font-bold">Account</h3>
           <p className="text-sm text-gray-500 dark:text-text-secondary">Manage your account information.</p>
-          <div className="mt-4 space-y-4 max-w-md">
+          <div className="mt-4 space-y-4">
             <input className="w-full h-10 px-4 rounded-lg bg-gray-100 dark:bg-surface-dark-search border-none focus:ring-2 focus:ring-primary-blue" defaultValue="Arjun Mehta" />
             <input className="w-full h-10 px-4 rounded-lg bg-gray-100 dark:bg-surface-dark-search border-none focus:ring-2 focus:ring-primary-blue" defaultValue="arjun.mehta@example.com" />
           </div>

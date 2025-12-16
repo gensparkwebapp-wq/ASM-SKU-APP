@@ -1,10 +1,11 @@
 import React from 'react';
 import { ViewState } from '../App';
-import { useSocialSphereData } from '../contexts/SocialSphereDataContext';
+import { useData } from '../contexts/DataContext';
 
 
 const LeftSidebar: React.FC = () => {
-  const { currentUser } = useSocialSphereData();
+  const { state } = useData();
+  const { currentUser } = state;
 
   const navItems: { icon: string; label: string; color: string; view?: ViewState }[] = [
     { icon: 'group', label: 'Friends', color: 'text-primary-blue', view: 'friends' },
@@ -18,21 +19,19 @@ const LeftSidebar: React.FC = () => {
   if (!currentUser) return null; // Or a loading state
 
   return (
-    <aside className="hidden lg:block w-80 p-3 h-[calc(100vh-56px)] sticky top-14">
-      <nav className="flex flex-col gap-1">
-        <a href="#profile" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-surface-dark-search transition-colors">
-          <img src={currentUser.avatarUrl} alt={currentUser.name} className="size-9 rounded-full" />
-          <span className="font-semibold">{currentUser.name}</span>
+    <nav className="flex flex-col gap-1 p-3 h-full sticky top-14">
+      <a href="#profile" className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-dark-search transition-colors min-h-[44px]">
+        <img src={currentUser.avatarUrl} alt={currentUser.name} className="size-9 rounded-full" />
+        <span className="font-medium text-text-secondary">{currentUser.name}</span>
+      </a>
+      {navItems.map(item => (
+        <a key={item.label} href={item.view ? `#${item.view}` : '#'} className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-dark-search transition-colors min-h-[44px]">
+          <span className={`material-symbols-outlined text-3xl ${item.color}`}>{item.icon}</span>
+          <span className="font-medium text-text-secondary">{item.label}</span>
         </a>
-        {navItems.map(item => (
-          <a key={item.label} href={item.view ? `#${item.view}` : '#'} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-surface-dark-search transition-colors">
-            <span className={`material-symbols-outlined text-3xl ${item.color}`}>{item.icon}</span>
-            <span className="font-semibold">{item.label}</span>
-          </a>
-        ))}
-      </nav>
-      <div className="border-t border-gray-300 dark:border-border-dark my-3"></div>
-    </aside>
+      ))}
+      <div className="border-t border-border-dark my-3"></div>
+    </nav>
   );
 };
 

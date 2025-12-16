@@ -1,225 +1,256 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy, useCallback } from "react";
 import { artists as initialArtists, Artist } from "./data/artists";
-import { videos as initialVideos, Video } from "./data/videos";
-import { mobileVideos as initialMobileVideos, MobileVideo } from "./data/mobileFeedData";
-import { SocialSphereDataProvider } from "./contexts/SocialSphereDataContext";
+import { DataProvider, useData } from "./contexts/DataContext";
 
-// --- Page Components ---
-// SocialSphere
-import SocialSphereHeader from "./components/SocialSphereHeader";
-import LeftSidebar from "./components/LeftSidebar";
-import RightSidebar from "./components/RightSidebar";
-import FeedPage from "./components/FeedPage";
-import FriendsPage from "./components/FriendsPage";
-import WatchPage from "./components/WatchPage";
-import MarketplacePage from "./components/MarketplacePage";
-import GroupsPage from "./components/GroupsPage";
-import ProfilePage from "./components/ProfilePage";
-import MessagesPage from "./components/MessagesPage";
-import NotificationsPage from "./components/NotificationsPage";
-import SettingsPage from "./components/SettingsPage";
-import LoginPage from "./components/LoginPage";
-import RegisterPage from "./components/RegisterPage";
-import SocialMediaPage from "./components/SocialMediaPage";
-import NotFoundPage from "./components/NotFoundPage";
+// --- App Containers ---
+const MasterHeader = lazy(() => import("./components/MasterHeader"));
 
-// Sangeet Kalakar
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import HomePage from "./components/HomePage";
-import ArtistsDirectory from "./components/ArtistsDirectory";
-import ArtistProfile from "./components/ArtistProfile";
-import StudioDetails from "./components/StudioDetails";
-import AboutPage from "./components/AboutPage";
-import MyStudios from "./components/MyStudios";
-import CategoriesPage from "./components/CategoriesPage";
-import EditProfile from "./components/EditProfile";
+// --- Artist Union Components ---
+const Header = lazy(() => import("./components/Header"));
+const Footer = lazy(() => import("./components/Footer"));
+const HomePage = lazy(() => import("./components/HomePage"));
+const ArtistsDirectory = lazy(() => import("./components/ArtistsDirectory"));
+const ArtistProfile = lazy(() => import("./components/ArtistProfile"));
+const StudioDetails = lazy(() => import("./components/StudioDetails"));
+const AboutPage = lazy(() => import("./components/AboutPage"));
+const MyStudios = lazy(() => import("./components/MyStudios"));
+const CategoriesPage = lazy(() => import("./components/CategoriesPage"));
+const EditProfile = lazy(() => import("./components/EditProfile"));
 
-// WeTube / StreamTube
-import WetubeMobilePage from "./components/WetubeMobilePage";
-import WetubePlayerPage from "./components/WetubePlayerPage";
-import WetubeMobilePlayerPage from "./components/WetubeMobilePlayerPage";
-import WetubeSearchPage from "./components/WetubeSearchPage";
-import WetubeMobileSearchPage from "./components/WetubeMobileSearchPage";
-import WetubeChannelPage from "./components/WetubeChannelPage";
-import WetubeLibraryPage from "./components/WetubeLibraryPage";
-import WetubeMobileLibraryPage from "./components/WetubeMobileLibraryPage";
-import WetubeSubscriptionsPage from "./components/WetubeSubscriptionsPage";
-import CreatorStudioMobilePage from "./components/CreatorStudioMobilePage";
-import StreamTubePage from "./components/StreamTubePage";
-import ShortsPage from "./components/ShortsPage";
-import YTStudioPage from "./components/YTStudioPage";
-import UploadPage from "./components/UploadPage";
-import WetubePage from "./components/WetubePage";
+// --- Social Sphere Components ---
+const SocialSphereHeader = lazy(() => import("./components/SocialSphereHeader"));
+const LeftSidebar = lazy(() => import("./components/LeftSidebar"));
+const RightSidebar = lazy(() => import("./components/RightSidebar"));
+const BottomNav = lazy(() => import("./components/BottomNav"));
+const FeedPage = lazy(() => import("./components/FeedPage"));
+const FriendsPage = lazy(() => import("./components/FriendsPage"));
+const WatchPage = lazy(() => import("./components/WatchPage"));
+const MarketplacePage = lazy(() => import("./components/MarketplacePage"));
+const GroupsPage = lazy(() => import("./components/GroupsPage"));
+const ProfilePage = lazy(() => import("./components/ProfilePage"));
+const MessagesPage = lazy(() => import("./components/MessagesPage"));
+const NotificationsPage = lazy(() => import("./components/NotificationsPage"));
+const SettingsPage = lazy(() => import("./components/SettingsPage"));
+const LoginPage = lazy(() => import("./components/LoginPage"));
+const RegisterPage = lazy(() => import("./components/RegisterPage"));
 
+// --- WeTube Components ---
+const WetubePage = lazy(() => import("./components/WetubePage"));
+import { videos } from "./data/videos";
+const WetubePlayerPage = lazy(() => import("./components/WetubePlayerPage"));
+const WetubeSearchPage = lazy(() => import("./components/WetubeSearchPage"));
+const WetubeChannelPage = lazy(() => import("./components/WetubeChannelPage"));
 
-// Combined ViewState type
+// --- Common Components ---
+const NotFoundPage = lazy(() => import("./components/NotFoundPage"));
+
 export type ViewState =
-  | 'feed' | 'friends' | 'watch' | 'marketplace' | 'groups' // SocialSphere Core
-  | 'profile' | 'messages' | 'notifications' | 'settings' // SocialSphere User
-  | 'login' | 'register' // Auth
-  // Sangeet Kalakar
   | 'home' | 'directory' | 'about' | 'my-studios' | 'categories' | 'edit-profile' | 'studio-details'
-  // WeTube / StreamTube
-  | 'social' | 'wetube-mobile' | 'wetube-subscriptions' | 'wetube-library' | 'wetube-channel' | 'upload'
-  | 'wetube-search' | 'wetube-player' | 'streamtube' | 'shorts'
-  | 'wetube-mobile-search' | 'wetube-mobile-player' | 'wetube-mobile-library'
+  | 'feed' | 'friends' | 'watch' | 'marketplace' | 'groups' | 'settings' | 'messages' | 'notifications' | 'profile' | 'login' | 'register'
+  | 'wetube' | 'wetube-player' | 'wetube-search' | 'wetube-channel' | 'wetube-subscriptions' | 'wetube-library' | 'upload'
+  | 'streamtube' | 'wetube-mobile' | 'wetube-mobile-search' | 'wetube-mobile-player' | 'wetube-mobile-library' | 'shorts'
   | 'creator-studio-mobile' | 'yt-studio';
 
-const getViewFromHash = (): string => {
-  const hash = window.location.hash.substring(1);
-  return hash || 'home'; // Default to Sangeet Kalakar home
+type AppName = 'artist-union' | 'social-sphere' | 'wetube';
+
+// This is the new, simplified layout component. It only handles the UI for a logged-in user.
+const SocialSphereLayout: React.FC<{ 
+    activeView: ViewState; 
+    handleNavigate: (view: ViewState, data?: any) => void;
+}> = ({ activeView, handleNavigate }) => {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const renderMainContent = () => {
+        switch(activeView) {
+            case 'feed': return <FeedPage />;
+            case 'friends': return <FriendsPage />;
+            case 'watch': return <WatchPage />;
+            case 'marketplace': return <MarketplacePage />;
+            case 'groups': return <GroupsPage />;
+            case 'profile': return <ProfilePage />;
+            case 'messages': return <MessagesPage />;
+            case 'notifications': return <NotificationsPage />;
+            case 'settings': return <SettingsPage />;
+            default: return <FeedPage />; // Default to feed if view is unknown but logged in
+        }
+    };
+    
+    return (
+        <div className="relative min-h-screen bg-background-dark font-body text-e4e6eb selection:bg-primary-blue selection:text-white">
+            <div className={`fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm lg:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                <div className="w-72 h-full bg-surface-dark shadow-lg" onClick={(e) => e.stopPropagation()}>
+                    <LeftSidebar />
+                </div>
+            </div>
+            <SocialSphereHeader activeView={activeView} onNavigate={handleNavigate} onToggleMobileMenu={() => setIsMobileMenuOpen(true)} />
+            <div className="pt-14 flex">
+                <div className="hidden lg:block w-[360px] shrink-0"><LeftSidebar /></div>
+                <main className="flex-1 px-2 sm:px-4 py-6">
+                    {renderMainContent()}
+                </main>
+                <div className="hidden lg:block w-[360px] shrink-0"><RightSidebar /></div>
+            </div>
+            <BottomNav activeView={activeView} onNavigate={handleNavigate} />
+        </div>
+    );
 };
 
+
 const App: React.FC = () => {
-  const [activeView, setActiveView] = useState<string>(getViewFromHash());
+  const [activeApp, setActiveApp] = useState<AppName>('social-sphere');
+  const [activeView, setActiveView] = useState<string>(window.location.hash.substring(1) || 'feed');
   const [pageData, setPageData] = useState<any>(null);
   const [isReady, setIsReady] = useState(false);
-  
-  // App-specific state
+
+  // Artist Union State
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [followedArtistIds, setFollowedArtistIds] = useState<number[]>([2, 4]);
   const [artists, setArtists] = useState<Artist[]>(initialArtists);
-  const [videos, setVideos] = useState<Video[]>(initialVideos);
-  const [mobileVideos, setMobileVideos] = useState<MobileVideo[]>(initialMobileVideos);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsReady(true), 500);
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    const handleHashChange = () => setActiveView(getViewFromHash());
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange(); // Initial load
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  const handleNavigate = (view: ViewState, data: any = null) => {
-    if (view === activeView && data === pageData) return;
-    setPageData(data);
-    window.location.hash = view;
+  const handleAppChange = (app: AppName) => {
+    setActiveApp(app);
+    if (app === 'artist-union') window.location.hash = 'home';
+    if (app === 'social-sphere') window.location.hash = 'feed';
+    if (app === 'wetube') window.location.hash = 'wetube';
   };
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.substring(1);
+      const view = hash.split('/')[0];
+      setActiveView(view || (activeApp === 'artist-union' ? 'home' : 'feed'));
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    handleHashChange();
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [activeApp]);
   
-  const handleFollowToggle = (artistId: number) => {
-    setFollowedArtistIds(prev =>
-      prev.includes(artistId)
-        ? prev.filter(id => id !== artistId)
-        : [...prev, artistId]
+  const handleNavigate = useCallback( (view: ViewState, data: any = null) => {
+      setPageData(data);
+      window.location.hash = view;
+    }, []);
+
+  // --- Artist Union Logic ---
+  const handleFollowToggle = useCallback((artistId: number) => {
+    setFollowedArtistIds(prev => prev.includes(artistId) ? prev.filter(id => id !== artistId) : [...prev, artistId]);
+  }, []);
+  const handleSaveProfile = useCallback((updatedArtist: Artist) => {
+    setArtists(prev => prev.map(a => a.id === updatedArtist.id ? updatedArtist : a));
+    handleNavigate('profile', updatedArtist);
+  }, [handleNavigate]);
+  
+  // --- Social Sphere Auth Wrapper ---
+  const SocialSphereAuthWrapper: React.FC = () => {
+      const { state } = useData();
+      const { currentUser } = state;
+
+      const privateViews: ViewState[] = ['feed', 'friends', 'watch', 'marketplace', 'groups', 'profile', 'messages', 'notifications', 'settings'];
+      const publicViews: ViewState[] = ['login', 'register'];
+
+      // If user is LOGGED IN
+      if (currentUser) {
+          // and trying to access a public page, redirect to feed
+          if (publicViews.includes(activeView as ViewState)) {
+              useEffect(() => { handleNavigate('feed'); }, [activeView]);
+              return <div className="min-h-screen bg-background-dark" />; // Render blank while redirecting
+          }
+          // otherwise, show the main app layout
+          return <SocialSphereLayout activeView={activeView as ViewState} handleNavigate={handleNavigate} />;
+      } 
+      // If user is NOT LOGGED IN
+      else {
+          // and trying to access a private page, redirect to login
+          if (privateViews.includes(activeView as ViewState)) {
+              useEffect(() => { handleNavigate('login'); }, [activeView]);
+              return <div className="min-h-screen bg-background-dark" />; // Render blank while redirecting
+          }
+
+          // otherwise, show the correct public page
+          switch(activeView) {
+              case 'register':
+                  return <RegisterPage onNavigate={handleNavigate} />;
+              case 'login':
+              default:
+                  return <LoginPage onNavigate={handleNavigate} />;
+          }
+      }
+  };
+
+
+  // --- RENDER FUNCTIONS ---
+  const renderArtistUnion = () => {
+    const renderContent = () => {
+      switch (activeView) {
+        case 'home': return <HomePage onNavigate={handleNavigate} />;
+        case 'directory': return <ArtistsDirectory artists={artists} onNavigate={handleNavigate} followedArtistIds={followedArtistIds} onFollowToggle={handleFollowToggle} />;
+        case 'about': return <AboutPage />;
+        case 'my-studios': return <MyStudios />;
+        case 'categories': return <CategoriesPage />;
+        case 'profile': return pageData && 'category' in pageData ? <ArtistProfile artist={pageData} onNavigate={handleNavigate} isFollowed={followedArtistIds.includes(pageData.id)} onFollowToggle={handleFollowToggle} /> : <NotFoundPage />;
+        case 'edit-profile': return pageData ? <EditProfile artist={pageData} onSave={handleSaveProfile} onCancel={() => handleNavigate('profile', pageData)} /> : <NotFoundPage />;
+        case 'studio-details': return pageData ? <StudioDetails studio={pageData} onBack={() => window.history.back()} /> : <NotFoundPage />;
+        default: return <NotFoundPage />;
+      }
+    };
+    return (
+      <div className="w-full min-h-screen bg-background-dark font-display text-white selection:bg-primary selection:text-white">
+        <Header isLoggedIn={isLoggedIn} onNavigate={handleNavigate} onLogout={() => setIsLoggedIn(false)} />
+        <main className="pt-20">{renderContent()}</main>
+        {activeView === 'home' && <Footer />}
+      </div>
+    );
+  };
+
+  const renderSocialSphere = () => {
+    return (
+      <DataProvider>
+          <SocialSphereAuthWrapper />
+      </DataProvider>
     );
   };
   
-  const handleSaveProfile = (updatedArtist: Artist) => {
-    setArtists(prev => prev.map(a => a.id === updatedArtist.id ? updatedArtist : a));
-    handleNavigate('profile', updatedArtist);
-  };
-
-  const handleUploadComplete = (newVideo: Video) => {
-    setVideos(prev => [newVideo, ...prev]);
-    handleNavigate('yt-studio');
-  };
-
-  const renderContent = () => {
+  const renderWeTube = () => {
     switch (activeView) {
-      // SocialSphere Core
-      case 'feed': return <FeedPage />;
-      case 'friends': return <FriendsPage />;
-      case 'watch': return <WatchPage />;
-      case 'marketplace': return <MarketplacePage />;
-      case 'groups': return <GroupsPage />;
-      case 'profile': return pageData && 'category' in pageData ? <ArtistProfile artist={pageData} onNavigate={handleNavigate} isFollowed={followedArtistIds.includes(pageData.id)} onFollowToggle={handleFollowToggle} /> : <ProfilePage />;
-      case 'messages': return <MessagesPage />;
-      case 'notifications': return <NotificationsPage />;
-      case 'settings': return <SettingsPage />;
-      case 'social': return <SocialMediaPage onLoginSuccess={() => {}} onNavigate={handleNavigate} />;
+        case 'wetube': return <WetubePage videos={videos} onNavigate={handleNavigate} />;
+        case 'wetube-player': return pageData ? <WetubePlayerPage video={pageData} allVideos={videos} onNavigate={handleNavigate} /> : <NotFoundPage />;
+        case 'wetube-search': return <WetubeSearchPage query={pageData || ''} onNavigate={handleNavigate} />;
+        case 'wetube-channel': return <WetubeChannelPage channelName={pageData || ''} onNavigate={handleNavigate} />;
+        default: return <WetubePage videos={videos} onNavigate={handleNavigate} />;
+    }
+  };
 
-      // Auth
-      case 'login': return <LoginPage />;
-      case 'register': return <RegisterPage />;
-
-      // Sangeet Kalakar
-      case 'home': return <HomePage onNavigate={handleNavigate} />;
-      case 'directory': return <ArtistsDirectory artists={artists} onNavigate={handleNavigate} followedArtistIds={followedArtistIds} onFollowToggle={handleFollowToggle} />;
-      case 'about': return <AboutPage />;
-      case 'my-studios': return <MyStudios />;
-      case 'categories': return <CategoriesPage />;
-      case 'edit-profile': return pageData ? <EditProfile artist={pageData} onSave={handleSaveProfile} onCancel={() => handleNavigate('profile', pageData)} /> : <NotFoundPage />;
-      case 'studio-details': return pageData ? <StudioDetails studio={pageData} onBack={() => window.history.back()} /> : <NotFoundPage />;
-
-      // WeTube / StreamTube
-      case 'wetube-mobile': return <WetubeMobilePage onNavigate={handleNavigate} />;
-      case 'wetube-player': return pageData ? <WetubePlayerPage video={pageData} allVideos={videos} onNavigate={handleNavigate} /> : <NotFoundPage />;
-      case 'wetube-mobile-player': return pageData ? <WetubeMobilePlayerPage video={pageData} allVideos={mobileVideos} onNavigate={handleNavigate} /> : <NotFoundPage />;
-      case 'wetube-search': return <WetubeSearchPage query={pageData || ''} onNavigate={handleNavigate} />;
-      case 'wetube-mobile-search': return <WetubeMobileSearchPage query={pageData || ''} onNavigate={handleNavigate} />;
-      case 'wetube-channel': return <WetubeChannelPage channelName={pageData || ''} onNavigate={handleNavigate} />;
-      case 'wetube-library': return <WetubeLibraryPage videos={videos} onNavigate={handleNavigate} />;
-      case 'wetube-mobile-library': return <WetubeMobileLibraryPage onNavigate={handleNavigate} />;
-      case 'wetube-subscriptions': return <WetubeSubscriptionsPage onNavigate={handleNavigate} />;
-      case 'creator-studio-mobile': return <CreatorStudioMobilePage onNavigate={handleNavigate} />;
-      case 'streamtube': return <StreamTubePage onNavigate={handleNavigate} />;
-      case 'shorts': return <ShortsPage onNavigate={handleNavigate} />;
-      case 'yt-studio': return <YTStudioPage onNavigate={handleNavigate} />;
-      case 'upload': return <UploadPage onUploadComplete={handleUploadComplete} onCancel={() => handleNavigate('yt-studio')} />;
-      case 'wetube-page-temp': return <WetubePage videos={videos} onNavigate={handleNavigate} />; // Temp route for the unused component
-
-      // Fallback
+  const renderActiveApp = () => {
+    switch (activeApp) {
+      case 'artist-union': return renderArtistUnion();
+      case 'social-sphere': return renderSocialSphere();
+      case 'wetube': return renderWeTube();
       default: return <NotFoundPage />;
     }
   };
 
+  const loadingFallback = (
+    <div className="flex items-center justify-center min-h-screen bg-background-dark">
+      <div className="flex flex-col items-center gap-4">
+        <div className="size-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-lg font-semibold">Loading AppSuite...</p>
+      </div>
+    </div>
+  );
+
   if (!isReady) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background-dark">
-        <div className="flex flex-col items-center gap-4">
-            <div className="size-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-lg font-semibold">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  const sangeetViews = ['home', 'directory', 'about', 'my-studios', 'profile', 'edit-profile', 'categories', 'studio-details'];
-  const socialViews = ['feed', 'friends', 'watch', 'marketplace', 'groups', 'messages', 'notifications', 'settings', 'social'];
-  const authViews = ['login', 'register'];
-  
-  // Fullscreen views manage their own layout
-  if (!sangeetViews.includes(activeView) && !socialViews.includes(activeView) && !authViews.includes(activeView)) {
-      return <div className="bg-background-dark w-full h-full">{renderContent()}</div>;
-  }
-  
-  if (authViews.includes(activeView)) {
-      return <div className="w-full min-h-screen bg-background-light dark:bg-background-dark font-body">{renderContent()}</div>;
+    return loadingFallback;
   }
 
-  if (sangeetViews.includes(activeView)) {
-    return (
-        <div className="w-full min-h-screen bg-background-dark font-display text-white selection:bg-primary selection:text-white">
-            <Header isLoggedIn={isLoggedIn} onNavigate={handleNavigate} onLogout={() => setIsLoggedIn(false)} />
-            <main className="pt-20">
-                {renderContent()}
-            </main>
-            <Footer />
-        </div>
-    );
-  }
-
-  // Default to SocialSphere Layout
   return (
-    <SocialSphereDataProvider>
-      <div className="w-full min-h-screen bg-background-light dark:bg-background-dark font-body text-black dark:text-white">
-        <SocialSphereHeader activeView={activeView as ViewState} onNavigate={handleNavigate} />
-        <main className="flex pt-14">
-          <LeftSidebar />
-          <div className="flex-1 px-4 lg:px-8 xl:px-20 py-6">
-            <div className="max-w-[1280px] mx-auto">
-              {renderContent()}
-            </div>
-          </div>
-          <RightSidebar />
-        </main>
-      </div>
-    </SocialSphereDataProvider>
+    <Suspense fallback={loadingFallback}>
+      <MasterHeader activeApp={activeApp} onAppChange={handleAppChange} />
+      {renderActiveApp()}
+    </Suspense>
   );
 };
 

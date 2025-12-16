@@ -2,9 +2,9 @@ import React from 'react';
 
 const MessagesPage: React.FC = () => {
   return (
-    <div className="bg-surface-light dark:bg-surface-dark rounded-lg shadow h-[calc(100vh-100px)] flex border border-gray-200 dark:border-border-dark">
+    <div className="bg-surface-light dark:bg-surface-dark rounded-lg shadow min-h-[calc(100vh-10rem)] flex flex-col md:flex-row border border-gray-200 dark:border-border-dark">
       {/* Conversation List */}
-      <div className="w-1/3 border-r border-gray-200 dark:border-border-dark">
+      <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-gray-200 dark:border-border-dark">
         <div className="p-4 border-b border-gray-200 dark:border-border-dark">
           <h2 className="text-xl font-bold">Messages</h2>
         </div>
@@ -28,16 +28,16 @@ const MessagesPage: React.FC = () => {
         </div>
       </div>
       {/* Chat Window */}
-      <div className="w-2/3 flex flex-col">
+      <div className="hidden md:flex w-full md:w-2/3 flex-col">
         <div className="p-4 border-b border-gray-200 dark:border-border-dark flex items-center gap-3">
             <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop" className="size-10 rounded-full"/>
             <h3 className="font-bold">Maria Garcia</h3>
         </div>
         <div className="flex-1 p-4 space-y-4 overflow-y-auto">
           {/* Placeholder messages */}
-          <div className="flex justify-end"><div className="bg-primary-blue text-white p-3 rounded-lg max-w-xs">Hey! Are we still on for tomorrow?</div></div>
-          <div className="flex justify-start"><div className="bg-gray-200 dark:bg-surface-dark-search p-3 rounded-lg max-w-xs">Yep, absolutely! Looking forward to it.</div></div>
-          <div className="flex justify-end"><div className="bg-primary-blue text-white p-3 rounded-lg max-w-xs">Sounds good! See you then.</div></div>
+          <div className="flex justify-end"><div className="bg-primary-blue text-white p-3 rounded-2xl max-w-xs">Hey! Are we still on for tomorrow?</div></div>
+          <div className="flex justify-start"><div className="bg-gray-200 dark:bg-surface-dark-search p-3 rounded-2xl max-w-xs">Yep, absolutely! Looking forward to it.</div></div>
+          <div className="flex justify-end"><div className="bg-primary-blue text-white p-3 rounded-2xl max-w-xs">Sounds good! See you then.</div></div>
         </div>
         <div className="p-4 border-t border-gray-200 dark:border-border-dark">
           <input className="w-full h-10 px-4 rounded-full bg-gray-100 dark:bg-surface-dark-search border-none" placeholder="Type a message..."/>

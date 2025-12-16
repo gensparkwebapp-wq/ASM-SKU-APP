@@ -36,8 +36,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, isLoggedIn, onLogout }) => 
     <>
       <button className="text-sm font-medium text-white/80 hover:text-primary transition-colors" onClick={() => handleNavClick('home')}>Home</button>
       <button className="text-sm font-medium text-white/80 hover:text-primary transition-colors" onClick={() => handleNavClick('directory')}>Artists</button>
-      <button className="text-sm font-medium text-white/80 hover:text-primary transition-colors" onClick={() => handleNavClick('wetube-mobile')}>Wetube</button>
-      <button className="text-sm font-medium text-white/80 hover:text-primary transition-colors" onClick={() => handleNavClick('social')}>Social</button>
       <button className="text-sm font-medium text-white/80 hover:text-primary transition-colors" onClick={() => handleNavClick('my-studios')}>Studios</button>
       <button className="text-sm font-medium text-white/80 hover:text-primary transition-colors" onClick={() => handleNavClick('about')}>About</button>
     </>
@@ -45,7 +43,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, isLoggedIn, onLogout }) => 
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full h-20 glass">
+      <header className="sticky top-12 z-50 w-full h-20 glass">
         <div className="relative flex h-full items-center justify-between px-4 md:px-8 max-w-[1400px] mx-auto">
           {/* Left Side: Branding */}
           <div className="flex items-center gap-4 cursor-pointer" onClick={handleLogoClick}>
@@ -91,8 +89,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, isLoggedIn, onLogout }) => 
                         <button onClick={() => handleNavClick('profile')} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
                           <span className="material-symbols-outlined text-base">person</span><span>My Profile</span>
                         </button>
-                        <button onClick={() => handleNavClick('yt-studio')} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
-                          <span className="material-symbols-outlined text-base">space_dashboard</span><span>Creator Studio</span>
+                        <button onClick={() => handleNavClick('my-studios')} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
+                          <span className="material-symbols-outlined text-base">space_dashboard</span><span>My Studios</span>
                         </button>
                         <button onClick={() => handleNavClick('categories')} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
                           <span className="material-symbols-outlined text-base">category</span><span>Manage Categories</span>
@@ -106,11 +104,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, isLoggedIn, onLogout }) => 
                       </>
                     ) : (
                       <>
-                        <button onClick={() => handleNavClick('social')} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
+                        <button onClick={() => alert('Login functionality to be added')} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
                           <span className="material-symbols-outlined text-base">login</span><span>Sign In</span>
-                        </button>
-                        <button onClick={() => handleNavClick('social')} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
-                          <span className="material-symbols-outlined text-base">person_add</span><span>Sign Up</span>
                         </button>
                       </>
                     )}
