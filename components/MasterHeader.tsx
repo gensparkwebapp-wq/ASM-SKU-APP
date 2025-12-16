@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useData } from '../contexts/DataContext';
 
 type AppName = 'artist-union' | 'social-sphere' | 'wetube';
 
@@ -14,17 +15,40 @@ const apps: { id: AppName, name: string }[] = [
 ];
 
 const MasterHeader: React.FC<MasterHeaderProps> = ({ activeApp, onAppChange }) => {
-  const currentUserAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&q=80';
+  const { state, actions } = useData();
+  const { currentUser } = state;
+  
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
-  const handleProfileClick = () => {
-    // Navigate to a generic profile page, or app-specific one
-    if (activeApp === 'social-sphere') {
-        window.location.hash = '#profile';
-    } else {
-        // For artist union, profile navigation requires artist data, which isn't available here.
-        // For now, we can just alert or navigate to a generic placeholder.
-        alert("Profile page is context-specific for this app.");
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    actions.logout();
+    setIsProfileMenuOpen(false);
+  };
+
+  const handleLoginClick = () => {
+    if (activeApp !== 'social-sphere') {
+      onAppChange('social-sphere');
     }
+    // Use timeout to allow app to switch before hash changes
+    setTimeout(() => {
+      window.location.hash = '#login';
+    }, 0);
+  };
+
+  const handleProfileLinkClick = (hash: string) => {
+    window.location.hash = hash;
+    setIsProfileMenuOpen(false);
   };
 
   return (
@@ -54,10 +78,40 @@ const MasterHeader: React.FC<MasterHeaderProps> = ({ activeApp, onAppChange }) =
         </div>
         
         <div className="flex items-center gap-4">
-            <button onClick={handleProfileClick} className="flex items-center gap-2 group">
-                 <img src={currentUserAvatar} alt="User Profile" className="size-8 rounded-full border-2 border-transparent group-hover:border-red-500 transition-colors" />
-                 <span className="hidden sm:block text-sm font-medium text-white/80 group-hover:text-white">Arjun Mehta</span>
-            </button>
+            {currentUser ? (
+                <div className="relative" ref={profileMenuRef}>
+                    <button onClick={() => setIsProfileMenuOpen(p => !p)} className="flex items-center gap-2 group">
+                        <img src={currentUser.avatarUrl} alt="User Profile" className="size-8 rounded-full border-2 border-transparent group-hover:border-red-500 transition-colors" />
+                        <span className="hidden sm:block text-sm font-medium text-white/80 group-hover:text-white">{currentUser.name}</span>
+                    </button>
+                    {isProfileMenuOpen && (
+                         <div className="absolute top-full right-0 mt-3 w-56 origin-top-right rounded-xl bg-surface-dark border border-white/10 shadow-2xl z-20 animate-in fade-in zoom-in-95 duration-200">
+                            <div className="p-2">
+                                <div className="px-3 py-2 flex items-center gap-3 border-b border-white/5 mb-1">
+                                    <img src={currentUser.avatarUrl} alt="User" loading="lazy" className="size-10 rounded-full object-cover"/>
+                                    <div>
+                                        <p className="text-sm font-bold text-white">{currentUser.name}</p>
+                                        <p className="text-xs text-white/50">@{currentUser.name.replace(/\s+/g, '_').toLowerCase()}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => handleProfileLinkClick('profile')} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
+                                    <span className="material-symbols-outlined text-base">person</span><span>My Profile</span>
+                                </button>
+                                <button onClick={handleLogout} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-md transition-colors">
+                                    <span className="material-symbols-outlined text-base">logout</span><span>Logout</span>
+                                </button>
+                            </div>
+                         </div>
+                    )}
+                </div>
+            ) : (
+                <button onClick={handleLoginClick} className="flex items-center gap-2 group">
+                    <div className="size-8 rounded-full border-2 border-transparent group-hover:border-red-500 transition-colors bg-surface-dark flex items-center justify-center">
+                        <span className="material-symbols-outlined text-white/50">person</span>
+                    </div>
+                    <span className="hidden sm:block text-sm font-medium text-white/80 group-hover:text-white">Log In</span>
+                </button>
+            )}
         </div>
       </div>
     </header>

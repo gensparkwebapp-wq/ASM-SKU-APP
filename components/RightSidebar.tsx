@@ -1,10 +1,5 @@
-import React from 'react';
-
-const people = [
-  { id: 1, name: 'Alex Johnson', mutuals: 5, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80' },
-  { id: 2, name: 'Maria Garcia', mutuals: 12, avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80' },
-  { id: 3, name: 'David Chen', mutuals: 2, avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80' }
-];
+import React, { useMemo } from 'react';
+import { useData } from '../contexts/DataContext';
 
 const trends = [
     { topic: 'Tech', name: '#React19', posts: '15.2K posts' },
@@ -13,8 +8,37 @@ const trends = [
 ];
 
 const RightSidebar: React.FC = () => {
+  const { state, actions } = useData();
+  const { currentUser, users, friendRequests } = state;
+
+  const suggestions = useMemo(() => {
+    if (!currentUser) return [];
+    
+    const friendIds = currentUser.friendIds || [];
+    const sentRequestIds = friendRequests
+        .filter(req => req.fromUserId === currentUser.id)
+        .map(req => req.toUserId);
+    const receivedRequestIds = friendRequests
+        .filter(req => req.toUserId === currentUser.id)
+        .map(req => req.fromUserId);
+    
+    const excludedIds = new Set([
+        currentUser.id,
+        ...friendIds,
+        ...sentRequestIds,
+        ...receivedRequestIds,
+    ]);
+
+    // Simple suggestion: just filter and shuffle, take first few
+    return users.filter(user => !excludedIds.has(user.id))
+      .sort(() => 0.5 - Math.random()) // pseudo-randomize
+      .slice(0, 3);
+
+  }, [currentUser, users, friendRequests]);
+
+
   return (
-    <aside className="w-[360px] p-3 h-[calc(100vh-3.5rem)] sticky top-14">
+    <aside className="w-[360px] p-3 h-[calc(100vh-3.5rem)] sticky top-14 overflow-y-auto hide-scrollbar">
       <div className="space-y-4">
         {/* Trends for you */}
         <div className="p-3">
@@ -32,19 +56,22 @@ const RightSidebar: React.FC = () => {
         </div>
 
         {/* People you may know */}
-        <div className="p-3">
-          <h3 className="text-lg font-semibold text-text-secondary mb-2">People you may know</h3>
-          {people.map(person => (
-            <div key={person.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-dark-search transition-colors">
-              <img src={person.avatar} alt={person.name} className="size-12 rounded-full" />
-              <div className="flex-1">
-                <p className="font-bold text-sm text-e4e6eb">{person.name}</p>
-                <p className="text-xs text-text-secondary">{person.mutuals} mutual friends</p>
-                <button className="mt-1 w-full h-8 text-sm font-bold bg-primary-blue text-white rounded-lg hover:bg-blue-600 transition-colors">Add Friend</button>
+        {suggestions.length > 0 && (
+          <div className="p-3">
+            <h3 className="text-lg font-semibold text-text-secondary mb-2">People you may know</h3>
+            {suggestions.map(person => (
+              <div key={person.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-dark-search transition-colors">
+                <a href={`#profile/${person.id}`}>
+                    <img src={person.avatarUrl} alt={person.name} className="size-12 rounded-full" />
+                </a>
+                <div className="flex-1">
+                  <a href={`#profile/${person.id}`} className="font-bold text-sm text-e4e6eb hover:underline">{person.name}</a>
+                  <button onClick={() => actions.sendFriendRequest(person.id)} className="mt-1 w-full h-8 text-sm font-bold bg-primary-blue text-white rounded-lg hover:bg-blue-600 transition-colors">Add Friend</button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </aside>
   );

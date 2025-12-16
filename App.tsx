@@ -208,9 +208,7 @@ const App: React.FC = () => {
 
   const renderSocialSphere = () => {
     return (
-      <DataProvider>
-          <SocialSphereAuthWrapper />
-      </DataProvider>
+      <SocialSphereAuthWrapper />
     );
   };
   
@@ -247,10 +245,12 @@ const App: React.FC = () => {
   }
 
   return (
-    <Suspense fallback={loadingFallback}>
-      <MasterHeader activeApp={activeApp} onAppChange={handleAppChange} />
-      {renderActiveApp()}
-    </Suspense>
+    <DataProvider>
+      <Suspense fallback={loadingFallback}>
+        <MasterHeader activeApp={activeApp} onAppChange={handleAppChange} />
+        {renderActiveApp()}
+      </Suspense>
+    </DataProvider>
   );
 };
 

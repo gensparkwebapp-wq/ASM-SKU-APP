@@ -10,6 +10,8 @@ export type PostAudience = PrivacyLevel;
 
 export type NotificationType = "friend_request" | "post_reaction" | "comment" | "message";
 
+export type FriendRequestStatus = "pending" | "accepted" | "declined" | "cancelled";
+
 
 // --- Core Interfaces ---
 
@@ -20,6 +22,7 @@ export interface User {
     shortBio?: string;
     createdAt: string; // ISO 8601 string
     role: UserRole;
+    friendIds?: string[];
 }
 
 export interface Post {
@@ -29,6 +32,7 @@ export interface Post {
     createdAt: string; // ISO 8601 string
     audience: PostAudience;
     likeCounts: Record<ReactionType, number>;
+    likedByUserIds?: string[];
     mediaUrls?: string[];
 }
 
@@ -39,6 +43,21 @@ export interface Comment {
     content: string;
     createdAt: string; // ISO 8601 string
     parentCommentId?: string | null;
+}
+
+export interface FriendRequest {
+    id: string;
+    fromUserId: string;
+    toUserId: string;
+    createdAt: string; // ISO 8601 string
+    status: FriendRequestStatus;
+}
+
+export interface Friendship {
+    id: string;
+    userId1: string;
+    userId2: string;
+    createdAt: string; // ISO 8601 string
 }
 
 export interface Conversation {

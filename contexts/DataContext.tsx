@@ -11,6 +11,11 @@ interface Actions {
     login: (userId: string) => void;
     logout: () => void;
     registerUser: (name: string, options?: { avatarUrl?: string; shortBio?: string }) => User;
+    sendFriendRequest: (toUserId: string) => void;
+    acceptFriendRequest: (requestId: string) => void;
+    declineFriendRequest: (requestId: string) => void;
+    cancelFriendRequest: (requestId: string) => void;
+    unfriend: (friendId: string) => void;
 }
 
 interface AugmentedState extends DataState {
@@ -47,6 +52,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login: store.login.bind(store),
         logout: store.logout.bind(store),
         registerUser: store.registerUser.bind(store),
+        sendFriendRequest: store.sendFriendRequest.bind(store),
+        acceptFriendRequest: store.acceptFriendRequest.bind(store),
+        declineFriendRequest: store.declineFriendRequest.bind(store),
+        cancelFriendRequest: store.cancelFriendRequest.bind(store),
+        unfriend: store.unfriend.bind(store),
     }), []);
 
     const value = useMemo(() => ({ state, actions }), [state, actions]);

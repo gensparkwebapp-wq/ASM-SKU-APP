@@ -1,11 +1,12 @@
-import { User, Post, Comment, Conversation, Message, Notification, ReactionType } from './socialSphereTypes';
+import { User, Post, Comment, Conversation, Message, Notification, ReactionType, FriendRequest, Friendship } from './socialSphereTypes';
 import { 
     seedCurrentUser,
     seedUsers,
     seedPosts,
     seedComments,
     seedConversations,
-    seedMessages
+    seedMessages,
+    seedFriendRequests
 } from './mockData';
 
 // --- STATE INTERFACE ---
@@ -14,6 +15,8 @@ export interface DataState {
   users: User[];
   posts: Post[];
   comments: Comment[];
+  friendRequests: FriendRequest[];
+  friendships: Friendship[];
   conversations: Conversation[];
   messages: Message[];
   notifications: Notification[];
@@ -28,6 +31,8 @@ const getInitialState = (): DataState => ({
   users: Object.values(seedUsers), // Convert record to array
   posts: seedPosts,
   comments: seedComments,
+  friendRequests: seedFriendRequests,
+  friendships: [],
   conversations: seedConversations,
   messages: seedMessages,
   notifications: [], // No seed notifications
@@ -153,6 +158,7 @@ export const store = {
             createdAt: new Date().toISOString(),
             audience: 'friends', // default
             likeCounts: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
+            likedByUserIds: [],
             mediaUrls: [],
         };
         return {
@@ -183,24 +189,159 @@ export const store = {
   },
 
   togglePostReaction(postId: string, reaction: ReactionType) {
-      mutate(currentState => ({
+      mutate(currentState => {
+        if (!currentState.currentUserId) {
+          console.warn("Cannot react to a post when not logged in.");
+          return currentState;
+        }
+        const currentUserId = currentState.currentUserId;
+
+        return {
           ...currentState,
           posts: currentState.posts.map(post => {
-              if (post.id === postId) {
-                  // This is a simplified implementation. A real app would check if the user
-                  // has already reacted and toggle accordingly. For now, it just increments.
-                  return {
-                      ...post,
-                      likeCounts: {
-                          ...post.likeCounts,
-                          [reaction]: (post.likeCounts[reaction] || 0) + 1,
-                      },
-                  };
+            if (post.id === postId && reaction === 'like') { // Per MVP, only handle 'like'
+              const likedByUserIds = post.likedByUserIds || [];
+              const userHasLiked = likedByUserIds.includes(currentUserId);
+              let newLikedByUserIds: string[];
+
+              if (userHasLiked) {
+                // Unlike the post
+                newLikedByUserIds = likedByUserIds.filter(id => id !== currentUserId);
+              } else {
+                // Like the post
+                newLikedByUserIds = [...likedByUserIds, currentUserId];
               }
-              return post;
+
+              // Return the updated post
+              return {
+                ...post,
+                likedByUserIds: newLikedByUserIds,
+                likeCounts: {
+                  ...post.likeCounts,
+                  like: newLikedByUserIds.length,
+                },
+              };
+            }
+            return post;
           }),
-      }));
+        };
+      });
   },
+
+  // --- FRIEND MUTATIONS ---
+  sendFriendRequest(toUserId: string) {
+    mutate(currentState => {
+      const { currentUserId, users, friendRequests } = currentState;
+      if (!currentUserId || currentUserId === toUserId) return currentState;
+
+      const currentUserData = users.find(u => u.id === currentUserId);
+      const areAlreadyFriends = currentUserData?.friendIds?.includes(toUserId);
+      if (areAlreadyFriends) return currentState;
+
+      const requestExists = friendRequests.some(
+        req => (req.fromUserId === currentUserId && req.toUserId === toUserId) ||
+               (req.fromUserId === toUserId && req.toUserId === currentUserId)
+      );
+      if (requestExists) return currentState;
+
+      const newRequest: FriendRequest = {
+        id: `fr-${Date.now()}`,
+        fromUserId: currentUserId,
+        toUserId,
+        createdAt: new Date().toISOString(),
+        status: 'pending',
+      };
+
+      return {
+        ...currentState,
+        friendRequests: [...friendRequests, newRequest],
+      };
+    });
+  },
+
+  acceptFriendRequest(requestId: string) {
+    mutate(currentState => {
+      const { currentUserId, users, friendRequests, friendships } = currentState;
+      const request = friendRequests.find(r => r.id === requestId);
+      if (!currentUserId || !request || request.toUserId !== currentUserId) return currentState;
+
+      const fromUserId = request.fromUserId;
+
+      const updatedUsers = users.map(user => {
+        if (user.id === currentUserId) {
+          return { ...user, friendIds: [...(user.friendIds || []), fromUserId] };
+        }
+        if (user.id === fromUserId) {
+          return { ...user, friendIds: [...(user.friendIds || []), currentUserId] };
+        }
+        return user;
+      });
+
+      const newFriendship: Friendship = {
+        id: `friendship-${fromUserId}-${currentUserId}`,
+        userId1: fromUserId,
+        userId2: currentUserId,
+        createdAt: new Date().toISOString(),
+      };
+
+      return {
+        ...currentState,
+        users: updatedUsers,
+        friendRequests: friendRequests.filter(r => r.id !== requestId),
+        friendships: [...friendships, newFriendship],
+      };
+    });
+  },
+
+  declineFriendRequest(requestId: string) {
+    mutate(currentState => {
+      const { currentUserId, friendRequests } = currentState;
+      const request = friendRequests.find(r => r.id === requestId);
+      // Only the recipient can decline a request.
+      if (!currentUserId || !request || request.toUserId !== currentUserId) return currentState;
+      return {
+        ...currentState,
+        friendRequests: friendRequests.filter(r => r.id !== requestId),
+      };
+    });
+  },
+
+  cancelFriendRequest(requestId: string) {
+    mutate(currentState => {
+      const { currentUserId, friendRequests } = currentState;
+      const request = friendRequests.find(r => r.id === requestId);
+       // Only the sender can cancel a request.
+      if (!currentUserId || !request || request.fromUserId !== currentUserId) return currentState;
+      return {
+        ...currentState,
+        friendRequests: friendRequests.filter(r => r.id !== requestId),
+      };
+    });
+  },
+
+  unfriend(friendId: string) {
+    mutate(currentState => {
+      const { currentUserId, users, friendships } = currentState;
+      if (!currentUserId) return currentState;
+
+      const updatedUsers = users.map(user => {
+        if (user.id === currentUserId) {
+          return { ...user, friendIds: (user.friendIds || []).filter(id => id !== friendId) };
+        }
+        if (user.id === friendId) {
+          return { ...user, friendIds: (user.friendIds || []).filter(id => id !== currentUserId) };
+        }
+        return user;
+      });
+
+      const updatedFriendships = friendships.filter(f => 
+        !((f.userId1 === currentUserId && f.userId2 === friendId) || (f.userId1 === friendId && f.userId2 === currentUserId))
+      );
+
+      return { ...currentState, users: updatedUsers, friendships: updatedFriendships };
+    });
+  },
+
 
   markAllNotificationsRead() {
       mutate(currentState => {

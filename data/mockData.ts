@@ -1,4 +1,4 @@
-import { User, Post, Comment, Conversation, Message, ReactionType } from './socialSphereTypes';
+import { User, Post, Comment, Conversation, Message, ReactionType, FriendRequest } from './socialSphereTypes';
 
 // --- USERS ---
 const currentUser: User = {
@@ -7,14 +7,15 @@ const currentUser: User = {
     avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&q=80',
     createdAt: new Date('2023-01-15T09:00:00Z').toISOString(),
     role: 'admin',
-    shortBio: 'Sound engineer & music producer. Chasing the perfect mix.'
+    shortBio: 'Sound engineer & music producer. Chasing the perfect mix.',
+    friendIds: ['user-1', 'user-2'],
 };
 
 const users: Record<string, User> = {
     [currentUser.id]: currentUser,
-    'user-1': { id: 'user-1', name: 'Maria Garcia', avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80', createdAt: new Date('2023-02-20T14:30:00Z').toISOString(), role: 'user', shortBio: 'Music lover. Creator.' },
-    'user-2': { id: 'user-2', name: 'Alex Johnson', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80', createdAt: new Date('2023-03-10T18:45:00Z').toISOString(), role: 'user', shortBio: 'Singer and songwriter.' },
-    'user-3': { id: 'user-3', name: 'David Chen', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80', createdAt: new Date('2023-04-05T11:20:00Z').toISOString(), role: 'moderator', shortBio: 'Rock guitarist.' },
+    'user-1': { id: 'user-1', name: 'Maria Garcia', avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80', createdAt: new Date('2023-02-20T14:30:00Z').toISOString(), role: 'user', shortBio: 'Music lover. Creator.', friendIds: ['user-0'] },
+    'user-2': { id: 'user-2', name: 'Alex Johnson', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80', createdAt: new Date('2023-03-10T18:45:00Z').toISOString(), role: 'user', shortBio: 'Singer and songwriter.', friendIds: ['user-0', 'user-3'] },
+    'user-3': { id: 'user-3', name: 'David Chen', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80', createdAt: new Date('2023-04-05T11:20:00Z').toISOString(), role: 'moderator', shortBio: 'Rock guitarist.', friendIds: ['user-2'] },
 };
 
 // --- POSTS ---
@@ -28,7 +29,8 @@ const posts: Post[] = [
         content: 'Had an amazing time at the concert last night! The energy was incredible.',
         mediaUrls: ['https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&h=600&fit=crop'],
         audience: 'public',
-        likeCounts: { ...defaultLikeCounts, like: 125, love: 10 },
+        likeCounts: { ...defaultLikeCounts, like: 2, love: 10 },
+        likedByUserIds: ['user-0', 'user-2'],
     },
     {
         id: 'post-2',
@@ -37,7 +39,8 @@ const posts: Post[] = [
         content: 'Beautiful evening for a live acoustic session. Thanks to everyone who came out!',
         mediaUrls: ['https://images.unsplash.com/photo-1464375117522-1311d6a5b81f?w=800&h=600&fit=crop'],
         audience: 'public',
-        likeCounts: { ...defaultLikeCounts, like: 340, love: 50, wow: 5 },
+        likeCounts: { ...defaultLikeCounts, like: 1, love: 50, wow: 5 },
+        likedByUserIds: ['user-1'],
     },
     {
         id: 'post-3',
@@ -46,7 +49,8 @@ const posts: Post[] = [
         content: 'New gear day! This beauty sounds absolutely insane. Can\'t wait to record with it. #guitar #newgear',
         mediaUrls: ['https://images.unsplash.com/photo-1550291652-6ea9114a47b1?w=800&h=600&fit=crop'],
         audience: 'friends',
-        likeCounts: { ...defaultLikeCounts, like: 98 },
+        likeCounts: { ...defaultLikeCounts, like: 0 },
+        likedByUserIds: [],
     },
     {
         id: 'post-4',
@@ -54,7 +58,8 @@ const posts: Post[] = [
         createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
         content: 'Mixing sessions are my favorite kind of therapy. Finding the right balance is everything.',
         audience: 'friends',
-        likeCounts: { ...defaultLikeCounts, like: 72, wow: 4 },
+        likeCounts: { ...defaultLikeCounts, like: 2, wow: 4 },
+        likedByUserIds: ['user-1', 'user-3'],
     },
 ];
 
@@ -90,6 +95,18 @@ const comments: Comment[] = [
         createdAt: new Date(Date.now() - 3.5 * 60 * 60 * 1000).toISOString(),
     },
 ];
+
+// --- FRIEND REQUESTS ---
+const friendRequests: FriendRequest[] = [
+    {
+        id: 'fr-1',
+        fromUserId: 'user-3',
+        toUserId: 'user-0',
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+        status: 'pending',
+    }
+];
+
 
 // --- CONVERSATIONS & MESSAGES ---
 const conversations: Conversation[] = [
@@ -146,6 +163,7 @@ export {
     users as seedUsers,
     posts as seedPosts,
     comments as seedComments,
+    friendRequests as seedFriendRequests,
     conversations as seedConversations,
     messages as seedMessages
 };
