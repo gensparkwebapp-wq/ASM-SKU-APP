@@ -1,10 +1,11 @@
 import React from "react";
+import GallerySection from "./GallerySection";
 
 const team = [
   { 
-    name: "Arjun Mehta", 
+    name: "Vijay K. Tiwari", 
     role: "President", 
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&q=80" 
+    image: "https://i.ibb.co/yBNg4yZ/vijay-tiwari.png" 
   },
   { 
     name: "Priya Singh", 
@@ -85,7 +86,7 @@ const AboutPage: React.FC = () => {
         </div>
 
         {/* Team Section */}
-        <div>
+        <div className="mb-24">
            <div className="flex flex-col items-center mb-12">
              <h2 className="text-3xl font-bold text-white mb-2">Meet the Board</h2>
              <div className="h-1 w-20 bg-primary rounded-full"></div>
@@ -94,7 +95,7 @@ const AboutPage: React.FC = () => {
            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
              {team.map((member, idx) => (
                <div key={idx} className="glass-card p-6 rounded-2xl flex flex-col items-center text-center group hover:bg-white/[0.07] transition-colors">
-                 <div className="size-24 md:size-32 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-primary transition-colors mb-6 shadow-lg">
+                 <div className="size-24 md:size-32 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-primary transition-colors mb-6 shadow-lg bg-background-dark">
                    <img src={member.image} alt={member.name} loading="lazy" className="w-full h-full object-cover" />
                  </div>
                  <h4 className="font-bold text-white text-lg mb-1">{member.name}</h4>
@@ -104,6 +105,7 @@ const AboutPage: React.FC = () => {
            </div>
         </div>
 
+        <GallerySection />
       </div>
     </div>
   );

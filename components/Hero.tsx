@@ -1,16 +1,26 @@
 import React from "react";
+// FIX: Corrected import type name from ViewState to the now unified ViewState. This file had an error because ViewState was not exported from App.tsx.
+import { ViewState } from '../App';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  onNavigate: (view: ViewState) => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   return (
-    <section className="relative w-full h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden">
+    <section className="relative w-full h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-background-dark">
+      {/* The correct background image with spotlights and smoke */}
       <div
-        className="absolute inset-0 bg-cover bg-center scale-110"
+        className="absolute inset-0 bg-cover bg-center opacity-50"
         style={{
           backgroundImage:
-            'url("https://images.unsplash.com/photo-1594125674939-57353a743745?q=80&w=2070&auto=format&fit=crop")',
+            'url("https://images.unsplash.com/photo-1629424119837-d95f365d96a7?q=80&w=2070&auto=format&fit=crop")',
         }}
       ></div>
-      <div className="absolute inset-0 bg-gradient-to-b from-background-dark/30 via-background-dark/80 to-background-dark"></div>
+      {/* The gradient overlay for text readability and mood */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background-dark/10 via-background-dark/60 to-background-dark"></div>
+      
+      {/* Content */}
       <div className="relative z-10 container mx-auto px-4 flex flex-col items-center text-center gap-6 max-w-4xl">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 mb-2">
           <span className="w-2 h-2 rounded-full bg-primary"></span>
@@ -18,7 +28,7 @@ const Hero: React.FC = () => {
             Official Union Portal
           </span>
         </div>
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-tight tracking-tighter text-white drop-shadow-lg">
+        <h1 className="text-6xl md:text-8xl lg:text-9xl font-black leading-tight tracking-tighter text-white drop-shadow-lg">
           Unite Your <br />
           <span className="text-primary drop-shadow-[0_0_20px_rgba(34,197,94,0.5)]">
             Rhythm
@@ -35,8 +45,10 @@ const Hero: React.FC = () => {
               arrow_forward
             </span>
           </button>
-          <button className="flex items-center justify-center h-12 px-8 rounded-full bg-white/5 border border-white/10 text-white text-base font-bold backdrop-blur-md hover:bg-white/10 transition-all">
-            <span>Explore Events</span>
+          <button 
+            onClick={() => onNavigate('directory')}
+            className="flex items-center justify-center h-12 px-8 rounded-full bg-white/5 border border-white/10 text-white text-base font-bold backdrop-blur-md hover:bg-white/10 transition-all">
+            <span>Artists Directory</span>
           </button>
         </div>
       </div>

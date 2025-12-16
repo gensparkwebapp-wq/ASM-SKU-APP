@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf--8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sangeet Kalakar Union</title>
+    <title>SocialSphere</title>
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap"
+      href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link
@@ -21,26 +21,32 @@
         theme: {
           extend: {
             colors: {
-              primary: "#22c55e",
-              "background-dark": "#0c1d15",
-              "surface-dark": "#112c20",
-              "border-dark": "rgba(60, 150, 90, 0.2)",
+              primary: "#f20d0d", // Old red primary color
+              "primary-blue": "#1877F2", // New blue for SocialSphere
+              "background-light": "#f0f2f5",
+              "background-dark": "#18191a", 
+              "surface-dark": "#242526",
+              "surface-light": "#ffffff",
+              "surface-dark-search": "#3a3b3c",
+              "text-secondary": "#b0b3b8",
+              "border-dark": "rgba(255, 255, 255, 0.1)",
               "text-placeholder": "rgba(255, 255, 255, 0.4)",
             },
             fontFamily: {
-              display: ["Spline Sans", "sans-serif"],
+              display: ["Plus Jakarta Sans", "sans-serif"],
               body: ["Noto Sans", "sans-serif"],
             },
             borderRadius: {
-              DEFAULT: "0.75rem",
-              lg: "1rem",
-              xl: "1.5rem",
-              "2xl": "2rem",
+              DEFAULT: "0.25rem",
+              md: "0.375rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              "2xl": "1rem",
               full: "9999px",
             },
             backgroundImage: {
               "neon-glow":
-                "radial-gradient(circle at center, rgba(34, 197, 94, 0.15) 0%, rgba(10, 29, 20, 0) 70%)",
+                "radial-gradient(circle at center, rgba(242, 13, 13, 0.15) 0%, rgba(15, 15, 15, 0) 70%)",
             },
           },
         },
@@ -48,15 +54,21 @@
     </script>
     <style>
       html {
-        color-scheme: dark;
+        color-scheme: light dark;
+      }
+      html.light, html.light body {
+        background-color: #f0f2f5;
+        color: #1c1e21;
+      }
+      html.dark, html.dark body {
+        background-color: #18191a;
+        color: #e4e6eb;
       }
       body {
-        background-color: #0c1d15;
-        color: white;
         font-family: 'Noto Sans', sans-serif;
       }
       h1, h2, h3, h4, h5, h6 {
-        font-family: 'Spline Sans', sans-serif;
+        font-family: 'Plus Jakarta Sans', 'sans-serif';
       }
       .hide-scrollbar::-webkit-scrollbar {
         display: none;
@@ -64,96 +76,6 @@
       .hide-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
-      }
-      .glass {
-        background: rgba(12, 29, 21, 0.5);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(60, 150, 90, 0.1);
-      }
-      .glass-card {
-        background: #112c20;
-        border: 1px solid rgba(60, 150, 90, 0.2);
-        transition: all 0.3s ease;
-      }
-      .glass-card:hover {
-        background: #143a28;
-        border-color: rgba(60, 150, 90, 0.4);
-        transform: translateY(-2px);
-      }
-      .filter-select {
-        @apply w-full h-12 px-4 rounded-lg bg-surface-dark border border-border-dark text-white text-sm placeholder:text-text-placeholder focus:outline-none focus:bg-surface-dark focus:border-primary focus:ring-1 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
-        color-scheme: dark;
-        caret-color: #22c55e;
-      }
-      /* Fix for white background on autofill/focus for DARK inputs */
-      html.dark .filter-select:-webkit-autofill,
-      html.dark .filter-select:-webkit-autofill:hover,
-      html.dark .filter-select:-webkit-autofill:focus,
-      html.dark .filter-select:-webkit-autofill:active {
-          -webkit-text-fill-color: #FFFFFF !important;
-          -webkit-box-shadow: 0 0 0px 1000px #112c20 inset !important;
-          transition: background-color 5000s ease-in-out 0s;
-          border-color: rgba(60, 150, 90, 0.2) !important;
-          caret-color: #22c55e;
-      }
-       /* Styles for WHITE inputs on Edit Profile page */
-      .edit-input, .edit-textarea {
-        background-color: white !important;
-        color: black !important;
-        border: 1px solid transparent;
-        border-radius: 0.5rem; /* rounded-lg */
-        padding-left: 1rem;
-        padding-right: 1rem;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-        width: 100%;
-        transition: all 0.2s ease-in-out;
-      }
-      .edit-input {
-        height: 2.75rem; /* h-11 */
-      }
-      .edit-textarea {
-         padding-top: 0.75rem;
-         padding-bottom: 0.75rem;
-      }
-      .edit-input:focus, .edit-textarea:focus {
-        outline: 2px solid transparent;
-        outline-offset: 2px;
-        border-color: #22c55e;
-        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.4);
-      }
-      /* Autofill styles for WHITE inputs */
-      html.dark .edit-input:-webkit-autofill,
-      html.dark .edit-input:-webkit-autofill:hover,
-      html.dark .edit-input:-webkit-autofill:focus,
-      html.dark .edit-input:-webkit-autofill:active {
-          -webkit-text-fill-color: #000000 !important;
-          -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
-          transition: background-color 5000s ease-in-out 0s;
-      }
-      .custom-select-option:hover {
-        background-color: rgba(34, 197, 94, 0.1);
-      }
-      @keyframes loading-spin {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(360deg);
-        }
-      }
-      .ad-loader {
-        border: 3px solid rgba(255, 255, 255, 0.1);
-        border-top-color: #22c55e;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: loading-spin 1s linear infinite;
-      }
-      .ad-active-border {
-        border: 2px solid #22c55e;
-        box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
       }
       .filled {
         font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;

@@ -150,7 +150,8 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      Array.from(files).forEach(file => {
+      // FIX: Explicitly type 'file' as File to resolve type inference issue.
+      Array.from(files).forEach((file: File) => {
         const reader = new FileReader();
         reader.onload = (e) => {
           if (e.target?.result) {
@@ -382,7 +383,7 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
                  className={`absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/30 transition-all cursor-pointer z-10 ${isVideoPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
                  onClick={toggleVideo}
                >
-                  <button className="size-16 rounded-full bg-primary/90 text-background-dark flex items-center justify-center shadow-[0_0_30px_rgba(43,238,121,0.5)] hover:scale-110 transition-transform group-hover:shadow-[0_0_40px_rgba(43,238,121,0.6)]">
+                  <button className="size-16 rounded-full bg-primary/90 text-background-dark flex items-center justify-center shadow-[0_0_30px_rgba(242,13,13,0.5)] hover:scale-110 transition-transform group-hover:shadow-[0_0_40px_rgba(242,13,13,0.6)]">
                     <span className="material-symbols-outlined filled text-[40px] ml-1">play_arrow</span>
                   </button>
                </div>
@@ -399,7 +400,7 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
              <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
                <button 
                  onClick={togglePlay}
-                 className="size-12 rounded-full bg-primary text-background-dark flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_15px_rgba(43,238,121,0.3)] shrink-0"
+                 className="size-12 rounded-full bg-primary text-background-dark flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_15px_rgba(242,13,13,0.3)] shrink-0"
                >
                  <span className="material-symbols-outlined filled text-[28px]">
                    {isPlaying ? 'pause' : 'play_arrow'}
@@ -836,9 +837,9 @@ const StudioDetails: React.FC<StudioDetailsProps> = ({ studio, onBack }) => {
 
               <button 
                 disabled={!selectedTime}
-                className={`w-full py-4 rounded-xl font-bold text-lg transition-all shadow-[0_0_20px_rgba(43,238,121,0.15)] ${
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all shadow-[0_0_20px_rgba(242,13,13,0.15)] ${
                   selectedTime 
-                    ? 'bg-primary text-background-dark hover:brightness-110 hover:shadow-[0_0_30px_rgba(43,238,121,0.4)]' 
+                    ? 'bg-primary text-background-dark hover:brightness-110 hover:shadow-[0_0_30px_rgba(242,13,13,0.4)]' 
                     : 'bg-white/10 text-white/40 cursor-not-allowed'
                 }`}
               >
