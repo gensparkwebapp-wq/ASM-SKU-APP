@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense, lazy, useCallback } from "react";
 import { artists as initialArtists, Artist } from "./data/artists";
 import { DataProvider, useData } from "./contexts/DataContext";
@@ -27,12 +28,17 @@ const FriendsPage = lazy(() => import("./components/FriendsPage"));
 const WatchPage = lazy(() => import("./components/WatchPage"));
 const MarketplacePage = lazy(() => import("./components/MarketplacePage"));
 const GroupsPage = lazy(() => import("./components/GroupsPage"));
+const CreateGroupPage = lazy(() => import("./components/CreateGroupPage"));
+const GroupDetailPage = lazy(() => import("./components/GroupDetailPage"));
 const ProfilePage = lazy(() => import("./components/ProfilePage"));
 const MessagesPage = lazy(() => import("./components/MessagesPage"));
 const NotificationsPage = lazy(() => import("./components/NotificationsPage"));
 const SettingsPage = lazy(() => import("./components/SettingsPage"));
 const LoginPage = lazy(() => import("./components/LoginPage"));
 const RegisterPage = lazy(() => import("./components/RegisterPage"));
+const SetPasswordPage = lazy(() => import("./components/SetPasswordPage"));
+const WelcomePage = lazy(() => import("./components/WelcomePage"));
+const TourPage = lazy(() => import("./components/TourPage"));
 
 // --- WeTube Components ---
 const WetubePage = lazy(() => import("./components/WetubePage"));
@@ -46,7 +52,7 @@ const NotFoundPage = lazy(() => import("./components/NotFoundPage"));
 
 export type ViewState =
   | 'home' | 'directory' | 'about' | 'my-studios' | 'categories' | 'edit-profile' | 'studio-details'
-  | 'feed' | 'friends' | 'watch' | 'marketplace' | 'groups' | 'settings' | 'messages' | 'notifications' | 'profile' | 'login' | 'register'
+  | 'feed' | 'friends' | 'watch' | 'marketplace' | 'groups' | 'create-group' | 'group' | 'settings' | 'messages' | 'notifications' | 'profile' | 'login' | 'register' | 'set-password' | 'welcome' | 'tour'
   | 'wetube' | 'wetube-player' | 'wetube-search' | 'wetube-channel' | 'wetube-subscriptions' | 'wetube-library' | 'upload'
   | 'streamtube' | 'wetube-mobile' | 'wetube-mobile-search' | 'wetube-mobile-player' | 'wetube-mobile-library' | 'shorts'
   | 'creator-studio-mobile' | 'yt-studio';
@@ -67,6 +73,8 @@ const SocialSphereLayout: React.FC<{
             case 'watch': return <WatchPage />;
             case 'marketplace': return <MarketplacePage />;
             case 'groups': return <GroupsPage />;
+            case 'create-group': return <CreateGroupPage />;
+            case 'group': return <GroupDetailPage />;
             case 'profile': return <ProfilePage />;
             case 'messages': return <MessagesPage />;
             case 'notifications': return <NotificationsPage />;
@@ -100,22 +108,18 @@ const App: React.FC = () => {
   const [activeApp, setActiveApp] = useState<AppName>('social-sphere');
   const [activeView, setActiveView] = useState<string>(window.location.hash.substring(1) || 'feed');
   const [pageData, setPageData] = useState<any>(null);
-  const [isReady, setIsReady] = useState(false);
 
   // Artist Union State
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [followedArtistIds, setFollowedArtistIds] = useState<number[]>([2, 4]);
   const [artists, setArtists] = useState<Artist[]>(initialArtists);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleAppChange = (app: AppName) => {
     setActiveApp(app);
     if (app === 'artist-union') window.location.hash = 'home';
-    if (app === 'social-sphere') window.location.hash = 'feed';
+    if (app === 'social-sphere') {
+        window.location.hash = 'feed'; 
+    }
     if (app === 'wetube') window.location.hash = 'wetube';
   };
 
@@ -149,8 +153,9 @@ const App: React.FC = () => {
       const { state } = useData();
       const { currentUser } = state;
 
-      const privateViews: ViewState[] = ['feed', 'friends', 'watch', 'marketplace', 'groups', 'profile', 'messages', 'notifications', 'settings'];
-      const publicViews: ViewState[] = ['login', 'register'];
+      // 'groups' and 'group' are excluded to allow public/guest access
+      const privateViews: ViewState[] = ['feed', 'friends', 'watch', 'marketplace', 'create-group', 'profile', 'messages', 'notifications', 'settings'];
+      const publicViews: ViewState[] = ['login', 'register', 'set-password', 'welcome', 'tour'];
 
       // If user is LOGGED IN
       if (currentUser) {
@@ -164,16 +169,33 @@ const App: React.FC = () => {
       } 
       // If user is NOT LOGGED IN
       else {
-          // and trying to access a private page, redirect to login
+          // Allow group views to be viewed by guests
+          if (activeView === 'group' || activeView === 'groups') {
+              return <SocialSphereLayout activeView={activeView as ViewState} handleNavigate={handleNavigate} />;
+          }
+
+          // Default landing for social sphere when logged out should be welcome
+          if (activeView === 'feed' || !activeView) {
+              useEffect(() => { handleNavigate('welcome'); }, []);
+              return <div className="min-h-screen bg-background-dark" />;
+          }
+
+          // and trying to access a private page, redirect to welcome
           if (privateViews.includes(activeView as ViewState)) {
-              useEffect(() => { handleNavigate('login'); }, [activeView]);
+              useEffect(() => { handleNavigate('welcome'); }, [activeView]);
               return <div className="min-h-screen bg-background-dark" />; // Render blank while redirecting
           }
 
           // otherwise, show the correct public page
           switch(activeView) {
+              case 'welcome':
+                  return <WelcomePage onNavigate={handleNavigate} />;
+              case 'tour':
+                  return <TourPage onNavigate={handleNavigate} />;
               case 'register':
                   return <RegisterPage onNavigate={handleNavigate} />;
+              case 'set-password':
+                  return <SetPasswordPage onNavigate={handleNavigate} />;
               case 'login':
               default:
                   return <LoginPage onNavigate={handleNavigate} />;
@@ -239,10 +261,6 @@ const App: React.FC = () => {
       </div>
     </div>
   );
-
-  if (!isReady) {
-    return loadingFallback;
-  }
 
   return (
     <DataProvider>

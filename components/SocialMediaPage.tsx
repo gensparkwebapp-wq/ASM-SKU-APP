@@ -35,8 +35,8 @@ const PostCard: React.FC<{ post: Post; author?: User; onReact: (id: string, reac
     }
 
     const postComments = state.comments.filter(c => c.postId === post.id);
-    // FIX: The reduce function was causing a type error. Using Number(count) ensures that the values are treated as numbers, resolving the 'unknown' type issue for totalLikes.
-    const totalLikes = Object.values(post.likeCounts).reduce((sum, count) => sum + Number(count), 0);
+    // FIX: The reduce function was causing a type error. Refactored to map values to Number before reducing for better type safety.
+    const totalLikes = Object.values(post.likeCounts).map(Number).reduce((sum, count) => sum + count, 0);
 
     const handleCommentSubmit = (e: React.FormEvent) => {
         e.preventDefault();

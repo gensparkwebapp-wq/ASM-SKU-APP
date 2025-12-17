@@ -42,9 +42,8 @@ class ErrorBoundary extends Component<Props, State> {
         </div>
       );
     }
-    // FIX: Destructuring props to resolve a potential type inference issue where this.props was not being found on the component type.
-    const { children } = this.props;
-    return children;
+    // FIX: Directly return `this.props.children` to fix the error "Property 'props' does not exist on type 'ErrorBoundary'".
+    return this.props.children;
   }
 }
 

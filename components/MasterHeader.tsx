@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useData } from '../contexts/DataContext';
 
@@ -16,7 +17,7 @@ const apps: { id: AppName, name: string }[] = [
 
 const MasterHeader: React.FC<MasterHeaderProps> = ({ activeApp, onAppChange }) => {
   const { state, actions } = useData();
-  const { currentUser } = state;
+  const { currentUser, users } = state;
   
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -51,6 +52,11 @@ const MasterHeader: React.FC<MasterHeaderProps> = ({ activeApp, onAppChange }) =
     setIsProfileMenuOpen(false);
   };
 
+  const handleSwitchUser = (userId: string) => {
+    actions.login(userId);
+    setIsProfileMenuOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-[60] h-12 w-full bg-[#111] backdrop-blur-lg border-b border-white/10 flex items-center">
       <div className="container mx-auto px-4 flex items-center justify-between h-full max-w-7xl">
@@ -81,11 +87,11 @@ const MasterHeader: React.FC<MasterHeaderProps> = ({ activeApp, onAppChange }) =
             {currentUser ? (
                 <div className="relative" ref={profileMenuRef}>
                     <button onClick={() => setIsProfileMenuOpen(p => !p)} className="flex items-center gap-2 group">
-                        <img src={currentUser.avatarUrl} alt="User Profile" className="size-8 rounded-full border-2 border-transparent group-hover:border-red-500 transition-colors" />
+                        <img src={currentUser.avatarUrl} alt="User Profile" className="size-8 rounded-full border-2 border-transparent group-hover:border-red-500 transition-colors object-cover" />
                         <span className="hidden sm:block text-sm font-medium text-white/80 group-hover:text-white">{currentUser.name}</span>
                     </button>
                     {isProfileMenuOpen && (
-                         <div className="absolute top-full right-0 mt-3 w-56 origin-top-right rounded-xl bg-surface-dark border border-white/10 shadow-2xl z-20 animate-in fade-in zoom-in-95 duration-200">
+                         <div className="absolute top-full right-0 mt-3 w-64 origin-top-right rounded-xl bg-surface-dark border border-white/10 shadow-2xl z-20 animate-in fade-in zoom-in-95 duration-200">
                             <div className="p-2">
                                 <div className="px-3 py-2 flex items-center gap-3 border-b border-white/5 mb-1">
                                     <img src={currentUser.avatarUrl} alt="User" loading="lazy" className="size-10 rounded-full object-cover"/>
@@ -97,9 +103,32 @@ const MasterHeader: React.FC<MasterHeaderProps> = ({ activeApp, onAppChange }) =
                                 <button onClick={() => handleProfileLinkClick('profile')} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
                                     <span className="material-symbols-outlined text-base">person</span><span>My Profile</span>
                                 </button>
-                                <button onClick={handleLogout} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-md transition-colors">
-                                    <span className="material-symbols-outlined text-base">logout</span><span>Logout</span>
+                                <button onClick={() => handleProfileLinkClick('settings')} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-white/80 hover:bg-white/5 rounded-md transition-colors">
+                                    <span className="material-symbols-outlined text-base">settings</span><span>Settings</span>
                                 </button>
+                                
+                                {/* Developer Tools Section */}
+                                <div className="mt-2 pt-2 border-t border-white/5">
+                                    <p className="px-3 py-1 text-xs font-bold text-white/40 uppercase tracking-wider">Dev Switch User</p>
+                                    <div className="max-h-40 overflow-y-auto custom-scrollbar">
+                                        {users.filter(u => u.id !== currentUser.id).slice(0, 5).map(user => (
+                                            <button 
+                                                key={user.id} 
+                                                onClick={() => handleSwitchUser(user.id)} 
+                                                className="w-full flex items-center gap-3 text-left px-3 py-2 text-xs text-white/70 hover:bg-white/5 hover:text-white rounded-md transition-colors"
+                                            >
+                                                <img src={user.avatarUrl} className="size-5 rounded-full object-cover" alt="" />
+                                                <span>{user.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="mt-2 pt-2 border-t border-white/5">
+                                    <button onClick={handleLogout} className="w-full flex items-center gap-3 text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-md transition-colors">
+                                        <span className="material-symbols-outlined text-base">logout</span><span>Logout</span>
+                                    </button>
+                                </div>
                             </div>
                          </div>
                     )}

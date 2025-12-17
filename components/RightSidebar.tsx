@@ -1,12 +1,6 @@
 import React, { useMemo } from 'react';
 import { useData } from '../contexts/DataContext';
 
-const trends = [
-    { topic: 'Tech', name: '#React19', posts: '15.2K posts' },
-    { topic: 'Music', name: '#IndieAcoustic', posts: '8,901 posts' },
-    { topic: 'Gaming', name: '#EldenRingDLC', posts: '45.7K posts' }
-];
-
 const RightSidebar: React.FC = () => {
   const { state, actions } = useData();
   const { currentUser, users, friendRequests } = state;
@@ -32,7 +26,7 @@ const RightSidebar: React.FC = () => {
     // Simple suggestion: just filter and shuffle, take first few
     return users.filter(user => !excludedIds.has(user.id))
       .sort(() => 0.5 - Math.random()) // pseudo-randomize
-      .slice(0, 3);
+      .slice(0, 4);
 
   }, [currentUser, users, friendRequests]);
 
@@ -40,22 +34,6 @@ const RightSidebar: React.FC = () => {
   return (
     <aside className="w-[360px] p-3 h-[calc(100vh-3.5rem)] sticky top-14 overflow-y-auto hide-scrollbar">
       <div className="space-y-4">
-        {/* Trends for you */}
-        <div className="p-3">
-          <h3 className="text-lg font-semibold text-text-secondary mb-2">Trends for you</h3>
-          <div className="space-y-3">
-            {trends.map(trend => (
-              <div key={trend.name} className="p-2 rounded-lg hover:bg-surface-dark-search cursor-pointer">
-                <p className="text-xs text-text-secondary">{trend.topic} · Trending</p>
-                <p className="font-bold text-sm text-e4e6eb">{trend.name}</p>
-                <p className="text-xs text-text-secondary">{trend.posts}</p>
-              </div>
-            ))}
-          </div>
-           <div className="border-t border-border-dark my-4"></div>
-        </div>
-
-        {/* People you may know */}
         {suggestions.length > 0 && (
           <div className="p-3">
             <h3 className="text-lg font-semibold text-text-secondary mb-2">People you may know</h3>
@@ -70,6 +48,7 @@ const RightSidebar: React.FC = () => {
                 </div>
               </div>
             ))}
+             <a href="#friends" onClick={(e) => { e.preventDefault(); window.location.hash = 'friends'; }} className="block text-sm font-semibold text-primary-blue p-2 mt-2 rounded-lg hover:bg-surface-dark-search text-center">See all</a>
           </div>
         )}
       </div>

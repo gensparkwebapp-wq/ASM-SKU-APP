@@ -317,4 +317,4 @@ const Filters: React.FC<FiltersProps> = ({ onApply, onReset }) => {
   );
 };
 
-export default Filters;
+export default React.memo(Filters);

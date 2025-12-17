@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import SearchBar from './SearchBar';
 import ArtistCard from './ArtistCard';
 import { Artist } from '../data/artists';
@@ -120,22 +120,22 @@ const ArtistsDirectory: React.FC<ArtistsDirectoryProps> = ({ artists: allArtists
 
   const artistsToDisplay = filteredArtists.slice(0, currentPage * ITEMS_PER_PAGE);
 
-  const handleApplyFilters = (filters: FilterState) => {
+  const handleApplyFilters = useCallback((filters: FilterState) => {
     setUserCoords(null); // Applying manual filters resets location search
     setLocationMessage(null);
     setActiveFilters(filters);
     setDistanceRadius(100);
     setSortBy('rating');
-  };
+  }, []);
   
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     setSearchQuery('');
     setActiveFilters(null);
     setUserCoords(null);
     setLocationMessage(null);
     setDistanceRadius(100);
     setSortBy('rating');
-  };
+  }, []);
 
   const handleNearMeClick = () => {
     setIsFetchingLocation(true);

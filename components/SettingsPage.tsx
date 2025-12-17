@@ -1,33 +1,85 @@
+
 import React from 'react';
 
 const SettingsPage: React.FC = () => {
   return (
-    <div className="bg-surface-light dark:bg-surface-dark rounded-lg shadow p-6 border border-gray-200 dark:border-border-dark max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Settings</h2>
-      <div className="space-y-8">
-        <div>
-          <h3 className="text-lg font-bold">Account</h3>
-          <p className="text-sm text-gray-500 dark:text-text-secondary">Manage your account information.</p>
-          <div className="mt-4 space-y-4">
-            <input className="w-full h-10 px-4 rounded-lg bg-gray-100 dark:bg-surface-dark-search border-none focus:ring-2 focus:ring-primary-blue" defaultValue="Arjun Mehta" />
-            <input className="w-full h-10 px-4 rounded-lg bg-gray-100 dark:bg-surface-dark-search border-none focus:ring-2 focus:ring-primary-blue" defaultValue="arjun.mehta@example.com" />
+    <div className="max-w-2xl mx-auto p-4 animate-in fade-in duration-300">
+      <div className="flex items-center gap-4 mb-6">
+         <button onClick={() => window.history.back()} className="size-10 flex items-center justify-center rounded-full hover:bg-surface-dark-search transition-colors text-white">
+            <span className="material-symbols-outlined text-2xl">arrow_back</span>
+         </button>
+         <h1 className="text-2xl font-bold text-white">Settings</h1>
+      </div>
+
+      <div className="bg-surface-dark rounded-xl border border-border-dark overflow-hidden divide-y divide-border-dark">
+        {/* Account Section */}
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-white mb-1">Account</h3>
+          <p className="text-sm text-text-secondary mb-4">Manage your personal information.</p>
+          <div className="space-y-4">
+            <div>
+                <label className="block text-xs font-bold text-text-secondary uppercase mb-1.5">Full Name</label>
+                <input className="w-full h-11 px-4 rounded-lg bg-surface-dark-search border border-transparent focus:border-primary-blue focus:ring-0 text-white transition-colors" defaultValue="Arjun Mehta" />
+            </div>
+            <div>
+                <label className="block text-xs font-bold text-text-secondary uppercase mb-1.5">Email Address</label>
+                <input className="w-full h-11 px-4 rounded-lg bg-surface-dark-search border border-transparent focus:border-primary-blue focus:ring-0 text-white transition-colors" defaultValue="arjun.mehta@example.com" />
+            </div>
           </div>
         </div>
-        <div>
-          <h3 className="text-lg font-bold">Privacy</h3>
-          <p className="text-sm text-gray-500 dark:text-text-secondary">Control who can see your activity.</p>
-           <div className="mt-4 space-y-3">
-             <label htmlFor="privacyToggle" className="flex justify-between items-center cursor-pointer">
-                <p>Make profile private</p>
+
+        {/* Privacy Section */}
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-white mb-1">Privacy</h3>
+          <p className="text-sm text-text-secondary mb-4">Control your profile visibility and data.</p>
+           <div className="space-y-4">
+             <label htmlFor="privacyToggle" className="flex justify-between items-center cursor-pointer group">
+                <div>
+                    <p className="text-white font-medium">Private Account</p>
+                    <p className="text-xs text-text-secondary">Only followers can see your photos and videos.</p>
+                </div>
                 <div className="relative">
                     <input type="checkbox" id="privacyToggle" className="sr-only peer" />
-                    <div className="w-10 h-6 bg-gray-200 dark:bg-surface-dark-search rounded-full peer peer-checked:bg-primary-blue"></div>
-                    <div className="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4"></div>
+                    <div className="w-11 h-6 bg-surface-dark-search rounded-full peer peer-checked:bg-primary-blue peer-focus:ring-2 peer-focus:ring-primary-blue/50 transition-colors"></div>
+                    <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+                </div>
+             </label>
+             <label htmlFor="activityToggle" className="flex justify-between items-center cursor-pointer group">
+                <div>
+                    <p className="text-white font-medium">Activity Status</p>
+                    <p className="text-xs text-text-secondary">Allow accounts you follow to see when you were last active.</p>
+                </div>
+                <div className="relative">
+                    <input type="checkbox" id="activityToggle" defaultChecked className="sr-only peer" />
+                    <div className="w-11 h-6 bg-surface-dark-search rounded-full peer peer-checked:bg-primary-blue peer-focus:ring-2 peer-focus:ring-primary-blue/50 transition-colors"></div>
+                    <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
                 </div>
              </label>
            </div>
         </div>
-        <button className="px-6 py-2 bg-primary-blue text-white font-bold rounded-lg hover:bg-blue-700 transition-colors">Save Changes</button>
+
+        {/* Notifications Section */}
+        <div className="p-6">
+            <h3 className="text-lg font-bold text-white mb-1">Notifications</h3>
+            <p className="text-sm text-text-secondary mb-4">Choose what you want to be notified about.</p>
+            <div className="space-y-3">
+                {['Likes', 'Comments', 'New Followers', 'Mentions'].map(item => (
+                    <div key={item} className="flex items-center justify-between">
+                        <span className="text-white">{item}</span>
+                        <select className="bg-surface-dark-search border-none text-white text-sm rounded-lg focus:ring-primary-blue">
+                            <option>Everyone</option>
+                            <option>People I Follow</option>
+                            <option>Off</option>
+                        </select>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        <div className="p-6 bg-surface-dark-search/30 flex justify-end gap-3">
+            <button onClick={() => window.history.back()} className="px-6 py-2.5 rounded-lg text-sm font-bold text-white hover:bg-surface-dark-search transition-colors">Cancel</button>
+            <button className="px-6 py-2.5 bg-primary-blue text-white font-bold rounded-lg hover:bg-blue-600 transition-colors shadow-lg shadow-primary-blue/20">Save Changes</button>
+        </div>
       </div>
     </div>
   );
